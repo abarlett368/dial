@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="RunAsAdministrator" xml:space="preserve"><value>以管理员身份运行</value></data>
+  <data name="AdministratorHint" xml:space="preserve"><value>启动此应用时，Windows 将请求你的许可。Microsoft Store 应用和 URI 快捷方式不支持此选项。</value></data>
+  <data name="AppElevationNotSupported" xml:space="preserve"><value>若要以管理员身份运行，请选择可执行文件。Microsoft Store 应用和 URI 快捷方式不支持此选项。</value></data>
+  <data name="ShowCenterField" xml:space="preserve"><value>显示圆心按钮</value></data>
+  <data name="InvalidConfiguration" xml:space="preserve"><value>配置必须包含一个 JSON 对象。</value></data>
+  <data name="AppName" xml:space="preserve"><value>dial</value></data>
+  <data name="WindowTitle" xml:space="preserve"><value>dial 设置</value></data>
+  <data name="General" xml:space="preserve"><value>常规</value></data>
+  <data name="Add" xml:space="preserve"><value>+ 添加</value></data>
+  <data name="Remove" xml:space="preserve"><value>删除</value></data>
+  <data name="LabelField" xml:space="preserve"><value>名称</value></data>
+  <data name="TypeField" xml:space="preserve"><value>类型</value></data>
+  <data name="TargetField" xml:space="preserve"><value>目标</value></data>
+  <data name="TargetLaunchApp" xml:space="preserve"><value>应用路径、命令或已安装的应用</value></data>
+  <data name="TargetOpenFile" xml:space="preserve"><value>文件或文件夹路径</value></data>
+  <data name="TargetOpenUrl" xml:space="preserve"><value>网址，例如 https://example.com</value></data>
+  <data name="TargetRunScript" xml:space="preserve"><value>命令或脚本路径</value></data>
+  <data name="TargetClipboard" xml:space="preserve"><value>要粘贴的文本</value></data>
+  <data name="ArgsField" xml:space="preserve"><value>参数（可选）</value></data>
+  <data name="CommandField" xml:space="preserve"><value>系统命令</value></data>
+  <data name="IconField" xml:space="preserve"><value>图标（可选：图片路径或最多 64 个字符）</value></data>
+  <data name="EnabledField" xml:space="preserve"><value>启用此项</value></data>
+  <data name="Browse" xml:space="preserve"><value>浏览...</value></data>
+  <data name="HotkeyField" xml:space="preserve"><value>键盘快捷键</value></data>
+  <data name="ShowAtMouseField" xml:space="preserve"><value>在鼠标位置显示</value></data>
+  <data name="IconModeField" xml:space="preserve"><value>图标和标签布局</value></data>
+  <data name="IconModeInside" xml:space="preserve"><value>图标在内，标签在外</value></data>
+  <data name="IconModeOutside" xml:space="preserve"><value>标签在内，图标在外</value></data>
+  <data name="IconModeIconsOnly" xml:space="preserve"><value>仅图标</value></data>
+  <data name="IconModeLabelsOnly" xml:space="preserve"><value>仅标签</value></data>
+  <data name="ThemeField" xml:space="preserve"><value>主题</value></data>
+  <data name="HoverColorField" xml:space="preserve"><value>强调色</value></data>
+  <data name="LanguageField" xml:space="preserve"><value>语言</value></data>
+  <data name="Startup" xml:space="preserve"><value>登录时启动</value></data>
+  <data name="MaxItemsReached" xml:space="preserve"><value>最多支持 16 个扇区</value></data>
+  <data name="Save" xml:space="preserve"><value>保存</value></data>
+  <data name="SavedStatus" xml:space="preserve"><value>已保存</value></data>
+  <data name="TrayOpenSettings" xml:space="preserve"><value>设置</value></data>
+  <data name="TrayReload" xml:space="preserve"><value>重新加载</value></data>
+  <data name="TrayExit" xml:space="preserve"><value>退出</value></data>
+  <data name="ReloadNotification" xml:space="preserve"><value>配置已重新加载</value></data>
+  <data name="TypeLaunchApp" xml:space="preserve"><value>启动应用</value></data>
+  <data name="TypeOpenFile" xml:space="preserve"><value>打开文件或文件夹</value></data>
+  <data name="TypeOpenUrl" xml:space="preserve"><value>打开网址</value></data>
+  <data name="TypeSystemCommand" xml:space="preserve"><value>系统命令</value></data>
+  <data name="TypeRunScript" xml:space="preserve"><value>运行命令或脚本</value></data>
+  <data name="TypeClipboard" xml:space="preserve"><value>粘贴文本</value></data>
+  <data name="CmdLock" xml:space="preserve"><value>锁定</value></data>
+  <data name="CmdSleep" xml:space="preserve"><value>睡眠</value></data>
+  <data name="CmdRestart" xml:space="preserve"><value>重新启动</value></data>
+  <data name="CmdShutdown" xml:space="preserve"><value>关机</value></data>
+  <data name="CmdSignOut" xml:space="preserve"><value>注销</value></data>
+  <data name="CmdVolumeUp" xml:space="preserve"><value>增大音量</value></data>
+  <data name="CmdVolumeDown" xml:space="preserve"><value>减小音量</value></data>
+  <data name="CmdVolumeMute" xml:space="preserve"><value>静音</value></data>
+  <data name="CmdScreenshot" xml:space="preserve"><value>截图</value></data>
+  <data name="CmdTaskManager" xml:space="preserve"><value>任务管理器</value></data>
+  <data name="CmdShowDesktop" xml:space="preserve"><value>显示桌面</value></data>
+  <data name="CmdEmptyRecycleBin" xml:space="preserve"><value>清空回收站</value></data>
+  <data name="CmdOpenSettings" xml:space="preserve"><value>打开设置</value></data>
+  <data name="CmdControlPanel" xml:space="preserve"><value>控制面板</value></data>
+  <data name="CmdClipboardHistory" xml:space="preserve"><value>剪贴板历史记录</value></data>
+  <data name="CmdEmojiPanel" xml:space="preserve"><value>表情符号面板</value></data>
+  <data name="CmdRunDialog" xml:space="preserve"><value>运行对话框</value></data>
+  <data name="ThemeDark" xml:space="preserve"><value>深色</value></data>
+  <data name="ThemeLight" xml:space="preserve"><value>浅色</value></data>
+  <data name="AccentWindowsBlue" xml:space="preserve"><value>Windows 蓝</value></data>
+  <data name="AccentSystem" xml:space="preserve"><value>Windows 强调色</value></data>
+  <data name="AccentSeaBlue" xml:space="preserve"><value>海蓝</value></data>
+  <data name="AccentCobalt" xml:space="preserve"><value>钴蓝</value></data>
+  <data name="AccentIndigo" xml:space="preserve"><value>靛蓝</value></data>
+  <data name="AccentViolet" xml:space="preserve"><value>紫罗兰</value></data>
+  <data name="AccentPinkPurple" xml:space="preserve"><value>粉紫</value></data>
+  <data name="AccentMagenta" xml:space="preserve"><value>品红</value></data>
+  <data name="AccentRed" xml:space="preserve"><value>红</value></data>
+  <data name="AccentOrange" xml:space="preserve"><value>橙</value></data>
+  <data name="AccentGold" xml:space="preserve"><value>金</value></data>
+  <data name="AccentGreen" xml:space="preserve"><value>绿</value></data>
+  <data name="AccentTeal" xml:space="preserve"><value>青绿</value></data>
+  <data name="AccentGraphite" xml:space="preserve"><value>石墨</value></data>
+  <data name="AccentBlack" xml:space="preserve"><value>中性灰</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>英语</value></data>
+  <data name="LanguageChinese" xml:space="preserve"><value>简体中文</value></data>
+  <data name="NewItem" xml:space="preserve"><value>新建项目</value></data>
+  <data name="AllFilesFilter" xml:space="preserve"><value>所有文件 (*.*)|*.*</value></data>
+  <data name="ProgramsFilter" xml:space="preserve"><value>程序 (*.exe;*.lnk;*.cmd;*.bat)|*.exe;*.lnk;*.cmd;*.bat|所有文件 (*.*)|*.*</value></data>
+  <data name="ConfigLoadError" xml:space="preserve"><value>无法加载你的设置。请检查设置文件后重试。</value></data>
+  <data name="ConfigSaveError" xml:space="preserve"><value>无法保存更改。请检查设置和文件夹权限。</value></data>
+  <data name="HotkeyError" xml:space="preserve"><value>无法注册键盘快捷键。其他应用可能正在使用此快捷键。</value></data>
+  <data name="DisplayError" xml:space="preserve"><value>无法显示轮盘。</value></data>
+  <data name="ActionError" xml:space="preserve"><value>无法完成此操作。</value></data>
+  <data name="UnexpectedError" xml:space="preserve"><value>dial 遇到意外错误，需要关闭。</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>上移</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>下移</value></data>
+  <data name="RecordShortcut" xml:space="preserve"><value>设置</value></data>
+  <data name="RecordShortcutHint" xml:space="preserve"><value>请按下快捷键。按 Esc 取消。</value></data>
+  <data name="SelectFile" xml:space="preserve"><value>选择文件</value></data>
+  <data name="SelectFolder" xml:space="preserve"><value>选择文件夹</value></data>
+  <data name="BrowseFolder" xml:space="preserve"><value>文件夹...</value></data>
+  <data name="ChooseApp" xml:space="preserve"><value>应用...</value></data>
+  <data name="InstalledAppsTitle" xml:space="preserve"><value>选择应用</value></data>
+  <data name="InstalledAppsHint" xml:space="preserve"><value>选择已安装的应用，包括来自 Microsoft Store 的应用。</value></data>
+  <data name="SearchApps" xml:space="preserve"><value>搜索应用</value></data>
+  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Select" xml:space="preserve"><value>选择</value></data>
+  <data name="InstalledAppsError" xml:space="preserve"><value>无法加载已安装的应用。请重试。</value></data>
+  <data name="InvalidShortcut" xml:space="preserve"><value>请设置包含 Ctrl、Alt、Shift 或 Windows 键的有效快捷键。</value></data>
+  <data name="InvalidAppearance" xml:space="preserve"><value>不支持所选的主题、语言、强调色或布局。</value></data>
+  <data name="InvalidItem" xml:space="preserve"><value>请检查项目设置。名称最多可包含 64 个字符。</value></data>
+  <data name="InvalidIcon" xml:space="preserve"><value>请输入图片路径或最多包含 64 个字符的文本图标。</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>请为每个已启用的项目输入名称。</value></data>
+  <data name="TargetRequired" xml:space="preserve"><value>请为“{0}”输入目标，或禁用此项。</value></data>
+  <data name="InvalidUrl" xml:space="preserve"><value>请输入完整网址，例如 https://example.com。</value></data>
+  <data name="InvalidAppTarget" xml:space="preserve"><value>应用标识符无效。请重新选择已安装的应用。</value></data>
+  <data name="RollbackError" xml:space="preserve"><value>无法恢复原来的快捷键或登录启动设置。请检查这些设置后重试。</value></data>
+  <data name="AppArgumentsNotSupported" xml:space="preserve"><value>此应用快捷方式不支持参数。如需使用参数，请选择应用的可执行文件。</value></data>
+  <data name="Items" xml:space="preserve"><value>项目</value></data>
+  <data name="DialMenu" xml:space="preserve"><value>dial 菜单</value></data>
+  <data name="DialNavigationHint" xml:space="preserve"><value>使用箭头键选择项目。按 Enter 打开，或按 Esc 关闭菜单。</value></data>
+</root>

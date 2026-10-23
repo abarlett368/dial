@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="RunAsAdministrator" xml:space="preserve"><value>Run as administrator</value></data>
+  <data name="AdministratorHint" xml:space="preserve"><value>Windows will ask for permission when this app starts. Store apps and URI shortcuts don't support this option.</value></data>
+  <data name="AppElevationNotSupported" xml:space="preserve"><value>To run as administrator, select an executable file. Store apps and URI shortcuts don't support this option.</value></data>
+  <data name="ShowCenterField" xml:space="preserve"><value>Show center button</value></data>
+  <data name="InvalidConfiguration" xml:space="preserve"><value>The configuration must contain a JSON object.</value></data>
+  <data name="AppName" xml:space="preserve"><value>dial</value></data>
+  <data name="WindowTitle" xml:space="preserve"><value>dial settings</value></data>
+  <data name="General" xml:space="preserve"><value>General</value></data>
+  <data name="Add" xml:space="preserve"><value>+ Add</value></data>
+  <data name="Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="LabelField" xml:space="preserve"><value>Name</value></data>
+  <data name="TypeField" xml:space="preserve"><value>Type</value></data>
+  <data name="TargetField" xml:space="preserve"><value>Target</value></data>
+  <data name="TargetLaunchApp" xml:space="preserve"><value>App path, command, or installed app</value></data>
+  <data name="TargetOpenFile" xml:space="preserve"><value>File or folder path</value></data>
+  <data name="TargetOpenUrl" xml:space="preserve"><value>URL, such as https://example.com</value></data>
+  <data name="TargetRunScript" xml:space="preserve"><value>Command or script path</value></data>
+  <data name="TargetClipboard" xml:space="preserve"><value>Text to paste</value></data>
+  <data name="ArgsField" xml:space="preserve"><value>Arguments (optional)</value></data>
+  <data name="CommandField" xml:space="preserve"><value>System command</value></data>
+  <data name="IconField" xml:space="preserve"><value>Icon (optional: image path or up to 64 characters)</value></data>
+  <data name="EnabledField" xml:space="preserve"><value>Enable this item</value></data>
+  <data name="Browse" xml:space="preserve"><value>Browse...</value></data>
+  <data name="HotkeyField" xml:space="preserve"><value>Keyboard shortcut</value></data>
+  <data name="ShowAtMouseField" xml:space="preserve"><value>Show at mouse position</value></data>
+  <data name="IconModeField" xml:space="preserve"><value>Icon and label layout</value></data>
+  <data name="IconModeInside" xml:space="preserve"><value>Icon inside, label outside</value></data>
+  <data name="IconModeOutside" xml:space="preserve"><value>Label inside, icon outside</value></data>
+  <data name="IconModeIconsOnly" xml:space="preserve"><value>Icons only</value></data>
+  <data name="IconModeLabelsOnly" xml:space="preserve"><value>Labels only</value></data>
+  <data name="ThemeField" xml:space="preserve"><value>Theme</value></data>
+  <data name="HoverColorField" xml:space="preserve"><value>Accent color</value></data>
+  <data name="LanguageField" xml:space="preserve"><value>Language</value></data>
+  <data name="Startup" xml:space="preserve"><value>Start when I sign in</value></data>
+  <data name="MaxItemsReached" xml:space="preserve"><value>Maximum of 16 sectors</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="SavedStatus" xml:space="preserve"><value>Saved</value></data>
+  <data name="TrayOpenSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="TrayReload" xml:space="preserve"><value>Reload</value></data>
+  <data name="TrayExit" xml:space="preserve"><value>Exit</value></data>
+  <data name="ReloadNotification" xml:space="preserve"><value>Configuration reloaded</value></data>
+  <data name="TypeLaunchApp" xml:space="preserve"><value>Launch app</value></data>
+  <data name="TypeOpenFile" xml:space="preserve"><value>Open file or folder</value></data>
+  <data name="TypeOpenUrl" xml:space="preserve"><value>Open URL</value></data>
+  <data name="TypeSystemCommand" xml:space="preserve"><value>System command</value></data>
+  <data name="TypeRunScript" xml:space="preserve"><value>Run command or script</value></data>
+  <data name="TypeClipboard" xml:space="preserve"><value>Paste text</value></data>
+  <data name="CmdLock" xml:space="preserve"><value>Lock</value></data>
+  <data name="CmdSleep" xml:space="preserve"><value>Sleep</value></data>
+  <data name="CmdRestart" xml:space="preserve"><value>Restart</value></data>
+  <data name="CmdShutdown" xml:space="preserve"><value>Shut down</value></data>
+  <data name="CmdSignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="CmdVolumeUp" xml:space="preserve"><value>Volume up</value></data>
+  <data name="CmdVolumeDown" xml:space="preserve"><value>Volume down</value></data>
+  <data name="CmdVolumeMute" xml:space="preserve"><value>Mute</value></data>
+  <data name="CmdScreenshot" xml:space="preserve"><value>Screenshot</value></data>
+  <data name="CmdTaskManager" xml:space="preserve"><value>Task Manager</value></data>
+  <data name="CmdShowDesktop" xml:space="preserve"><value>Show desktop</value></data>
+  <data name="CmdEmptyRecycleBin" xml:space="preserve"><value>Empty Recycle Bin</value></data>
+  <data name="CmdOpenSettings" xml:space="preserve"><value>Open Settings</value></data>
+  <data name="CmdControlPanel" xml:space="preserve"><value>Control Panel</value></data>
+  <data name="CmdClipboardHistory" xml:space="preserve"><value>Clipboard history</value></data>
+  <data name="CmdEmojiPanel" xml:space="preserve"><value>Emoji panel</value></data>
+  <data name="CmdRunDialog" xml:space="preserve"><value>Run dialog</value></data>
+  <data name="ThemeDark" xml:space="preserve"><value>Dark</value></data>
+  <data name="ThemeLight" xml:space="preserve"><value>Light</value></data>
+  <data name="AccentWindowsBlue" xml:space="preserve"><value>Windows blue</value></data>
+  <data name="AccentSystem" xml:space="preserve"><value>Windows accent</value></data>
+  <data name="AccentSeaBlue" xml:space="preserve"><value>Sea blue</value></data>
+  <data name="AccentCobalt" xml:space="preserve"><value>Cobalt</value></data>
+  <data name="AccentIndigo" xml:space="preserve"><value>Indigo</value></data>
+  <data name="AccentViolet" xml:space="preserve"><value>Violet</value></data>
+  <data name="AccentPinkPurple" xml:space="preserve"><value>Pink purple</value></data>
+  <data name="AccentMagenta" xml:space="preserve"><value>Magenta</value></data>
+  <data name="AccentRed" xml:space="preserve"><value>Red</value></data>
+  <data name="AccentOrange" xml:space="preserve"><value>Orange</value></data>
+  <data name="AccentGold" xml:space="preserve"><value>Gold</value></data>
+  <data name="AccentGreen" xml:space="preserve"><value>Green</value></data>
+  <data name="AccentTeal" xml:space="preserve"><value>Teal</value></data>
+  <data name="AccentGraphite" xml:space="preserve"><value>Graphite</value></data>
+  <data name="AccentBlack" xml:space="preserve"><value>Neutral gray</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageChinese" xml:space="preserve"><value>Chinese (Simplified)</value></data>
+  <data name="NewItem" xml:space="preserve"><value>New item</value></data>
+  <data name="AllFilesFilter" xml:space="preserve"><value>All files (*.*)|*.*</value></data>
+  <data name="ProgramsFilter" xml:space="preserve"><value>Programs (*.exe;*.lnk;*.cmd;*.bat)|*.exe;*.lnk;*.cmd;*.bat|All files (*.*)|*.*</value></data>
+  <data name="ConfigLoadError" xml:space="preserve"><value>Couldn't load your settings. Check the settings file and try again.</value></data>
+  <data name="ConfigSaveError" xml:space="preserve"><value>Couldn't save your changes. Check the settings and folder permissions.</value></data>
+  <data name="HotkeyError" xml:space="preserve"><value>Couldn't register the keyboard shortcut. It may be used by another app.</value></data>
+  <data name="DisplayError" xml:space="preserve"><value>Couldn't display the dial.</value></data>
+  <data name="ActionError" xml:space="preserve"><value>Couldn't complete this action.</value></data>
+  <data name="UnexpectedError" xml:space="preserve"><value>dial encountered an unexpected error and needs to close.</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="RecordShortcut" xml:space="preserve"><value>Set</value></data>
+  <data name="RecordShortcutHint" xml:space="preserve"><value>Press a shortcut. Press Esc to cancel.</value></data>
+  <data name="SelectFile" xml:space="preserve"><value>Select a file</value></data>
+  <data name="SelectFolder" xml:space="preserve"><value>Select a folder</value></data>
+  <data name="BrowseFolder" xml:space="preserve"><value>Folder...</value></data>
+  <data name="ChooseApp" xml:space="preserve"><value>Apps...</value></data>
+  <data name="InstalledAppsTitle" xml:space="preserve"><value>Select an app</value></data>
+  <data name="InstalledAppsHint" xml:space="preserve"><value>Choose an installed app, including apps from Microsoft Store.</value></data>
+  <data name="SearchApps" xml:space="preserve"><value>Search apps</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Select" xml:space="preserve"><value>Select</value></data>
+  <data name="InstalledAppsError" xml:space="preserve"><value>Couldn't load installed apps. Try again.</value></data>
+  <data name="InvalidShortcut" xml:space="preserve"><value>Choose a valid keyboard shortcut with Ctrl, Alt, Shift, or the Windows key.</value></data>
+  <data name="InvalidAppearance" xml:space="preserve"><value>A theme, language, accent color, or layout isn't supported.</value></data>
+  <data name="InvalidItem" xml:space="preserve"><value>Check the item settings. Names can contain up to 64 characters.</value></data>
+  <data name="InvalidIcon" xml:space="preserve"><value>Enter an image path or a text icon of up to 64 characters.</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Enter a name for each enabled item.</value></data>
+  <data name="TargetRequired" xml:space="preserve"><value>Enter a target for "{0}", or turn off this item.</value></data>
+  <data name="InvalidUrl" xml:space="preserve"><value>Enter a complete URL, such as https://example.com.</value></data>
+  <data name="InvalidAppTarget" xml:space="preserve"><value>Select an installed app again. Its app identifier isn't valid.</value></data>
+  <data name="RollbackError" xml:space="preserve"><value>Couldn't restore the previous shortcut or startup setting. Check these settings before trying again.</value></data>
+  <data name="AppArgumentsNotSupported" xml:space="preserve"><value>This app shortcut doesn't support arguments. To use arguments, select the app's executable file instead.</value></data>
+  <data name="Items" xml:space="preserve"><value>Items</value></data>
+  <data name="DialMenu" xml:space="preserve"><value>dial menu</value></data>
+  <data name="DialNavigationHint" xml:space="preserve"><value>Use the arrow keys to select an item. Press Enter to open it, or Esc to close the menu.</value></data>
+</root>
