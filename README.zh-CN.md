@@ -58,4 +58,4 @@ dotnet publish .\Dial\Dial.csproj -p:PublishProfile=Portable -o .\publish\dial-w
 
 ## 版权
 
-版权所有 © 2026 abarlett368。保留所有权利。未授予使用、修改或分发本软件的许可。
+版权所有 2026 abarlett368。保留所有权利。未授予使用、修改或分发本软件的许可。
