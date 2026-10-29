@@ -33,6 +33,12 @@ public sealed class NativeBackdrop : IDisposable
     private CompositionPathGeometry? _centerTintPath;
     private CompositionGeometricClip? _centerTintClip;
     private CompositionGeometrySource? _centerTintSource;
+    private GeometryGroup? _centerOutlineGeometry;
+    private SpriteVisual? _centerOutlineVisual;
+    private CompositionColorBrush? _centerOutlineBrush;
+    private CompositionPathGeometry? _centerOutlinePath;
+    private CompositionGeometricClip? _centerOutlineClip;
+    private CompositionGeometrySource? _centerOutlineSource;
     private SpriteVisual? _sectorVisual;
     private CompositionBackdropBrush? _material;
     private bool _synchronizingOrder;
@@ -126,7 +132,7 @@ public sealed class NativeBackdrop : IDisposable
                 _visual!.Children.InsertAtTop(_sectorVisual);
                 if (_centerGeometry is not null)
                 {
-                    _centerTintSource = new CompositionGeometrySource(_centerGeometry);
+                    _centerTintSource = new CompositionGeometrySource(CreateCenterFill(dpiScale));
                     _centerTintPath = _compositor.CreatePathGeometry(new CompositionPath(_centerTintSource.AsGeometry()));
                     _centerTintClip = _compositor.CreateGeometricClip(_centerTintPath);
                     _centerTintBrush = _compositor.CreateColorBrush();
@@ -135,6 +141,16 @@ public sealed class NativeBackdrop : IDisposable
                     _centerTintVisual.Clip = _centerTintClip;
                     _centerTintVisual.Size = _visualSize;
                     _visual.Children.InsertAtTop(_centerTintVisual);
+                    _centerOutlineGeometry = CreateCenterOutline(dpiScale);
+                    _centerOutlineSource = new CompositionGeometrySource(_centerOutlineGeometry);
+                    _centerOutlinePath = _compositor.CreatePathGeometry(new CompositionPath(_centerOutlineSource.AsGeometry()));
+                    _centerOutlineClip = _compositor.CreateGeometricClip(_centerOutlinePath);
+                    _centerOutlineBrush = _compositor.CreateColorBrush();
+                    _centerOutlineVisual = _compositor.CreateSpriteVisual();
+                    _centerOutlineVisual.Brush = _centerOutlineBrush;
+                    _centerOutlineVisual.Clip = _centerOutlineClip;
+                    _centerOutlineVisual.Size = _visualSize;
+                    _visual.Children.InsertAtTop(_centerOutlineVisual);
                 }
                 _maskCount = count;
                 _maskDpi = dpiScale;
@@ -257,6 +273,7 @@ public sealed class NativeBackdrop : IDisposable
                 _visual.CenterPoint = new Vector3(size / 2, 0);
                 if (_sectorVisual is not null) _sectorVisual.Size = size;
                 if (_centerTintVisual is not null) _centerTintVisual.Size = size;
+                if (_centerOutlineVisual is not null) _centerOutlineVisual.Size = size;
             }
             _visual.Scale = new Vector3((float)scale, (float)scale, 1);
             _visual.Opacity = Kind == BackdropKind.Opaque ? 0 : (float)opacity;
@@ -301,7 +318,7 @@ public sealed class NativeBackdrop : IDisposable
         finally { if (!committed) source.Dispose(); }
         if (_centerGeometry is not null && _centerTintPath is not null)
         {
-            var centerSource = new CompositionGeometrySource(_centerGeometry);
+            var centerSource = new CompositionGeometrySource(CreateCenterFill(_maskDpi));
             bool centerCommitted = false;
             try
             {
@@ -312,13 +329,44 @@ public sealed class NativeBackdrop : IDisposable
                 previous?.Dispose();
             }
             finally { if (!centerCommitted) centerSource.Dispose(); }
+            if (_centerOutlinePath is not null)
+            {
+                var geometry = CreateCenterOutline(_maskDpi);
+                var outlineSource = new CompositionGeometrySource(geometry);
+                bool outlineCommitted = false;
+                try
+                {
+                    _centerOutlinePath.Path = new CompositionPath(outlineSource.AsGeometry());
+                    var previous = _centerOutlineSource;
+                    _centerOutlineSource = outlineSource;
+                    _centerOutlineGeometry = geometry;
+                    outlineCommitted = true;
+                    previous?.Dispose();
+                }
+                finally { if (!outlineCommitted) outlineSource.Dispose(); }
+            }
         }
     }
 
-    public void SetCenterTint(Color color)
+    private GeometryGroup CreateCenterOutline(Vector2 dpi)
+    {
+        var outer = _centerGeometry!.Clone();
+        var inner = new EllipseGeometry(outer.Center,
+            Math.Max(0, outer.RadiusX - DialGeometry.OutlineThickness * dpi.X),
+            Math.Max(0, outer.RadiusY - DialGeometry.OutlineThickness * dpi.Y));
+        return new GeometryGroup { FillRule = FillRule.EvenOdd, Children = { outer, inner } };
+    }
+
+    private EllipseGeometry CreateCenterFill(Vector2 dpi) => new(_centerGeometry!.Center,
+        Math.Max(0, _centerGeometry.RadiusX - DialGeometry.OutlineThickness * dpi.X / 2),
+        Math.Max(0, _centerGeometry.RadiusY - DialGeometry.OutlineThickness * dpi.Y / 2));
+
+    public void SetCenterTint(Color color, Color outline)
     {
         if (_centerTintBrush is not null)
             _centerTintBrush.Color = Windows.UI.Color.FromArgb(color.A, color.R, color.G, color.B);
+        if (_centerOutlineBrush is not null)
+            _centerOutlineBrush.Color = Windows.UI.Color.FromArgb(outline.A, outline.R, outline.G, outline.B);
     }
 
     public void SetCenterRadius(double radius, DpiScale dpi)
@@ -475,6 +523,17 @@ public sealed class NativeBackdrop : IDisposable
         CompositionTarget.Rendering -= UpdateSectorSurface;
         _surfacePending = false;
         _visual?.Children.RemoveAll();
+        _centerOutlineVisual?.Dispose();
+        _centerOutlineBrush?.Dispose();
+        _centerOutlineClip?.Dispose();
+        _centerOutlinePath?.Dispose();
+        _centerOutlineSource?.Dispose();
+        _centerOutlineGeometry = null;
+        _centerOutlineVisual = null;
+        _centerOutlineBrush = null;
+        _centerOutlineClip = null;
+        _centerOutlinePath = null;
+        _centerOutlineSource = null;
         _centerTintVisual?.Dispose();
         _centerTintBrush?.Dispose();
         _centerTintClip?.Dispose();

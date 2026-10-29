@@ -50,7 +50,7 @@ public partial class App : Application
         {
             _config = _configService.Load();
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
+        catch (Exception exception) when (exception is InvalidDataException or IOException or UnauthorizedAccessException or JsonException)
         {
             ErrorService.Report("ConfigLoadError", exception);
             Shutdown(1);
@@ -146,7 +146,7 @@ public partial class App : Application
             CommitConfiguration(config, false);
             _settings?.Close();
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException
+        catch (Exception exception) when (exception is InvalidDataException or IOException or UnauthorizedAccessException or JsonException
             or System.ComponentModel.Win32Exception or System.Security.SecurityException)
         {
             ErrorService.Report("ConfigLoadError", exception);

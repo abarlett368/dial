@@ -87,8 +87,7 @@ public sealed class ConfigService
                 throw new InvalidDataException(LocalizationService.T("InvalidIcon"));
             if (!item.Enabled) continue;
             if (item.Type == MenuItemType.LaunchApp && item.RunAsAdministrator &&
-                (InstalledAppService.IsShellTarget(item.Target) ||
-                 Uri.TryCreate(item.Target, UriKind.Absolute, out var appUri) && !appUri.IsFile))
+                !ActionExecutor.SupportsElevation(item.Target))
                 throw new InvalidDataException(LocalizationService.T("AppElevationNotSupported"));
             if (string.IsNullOrWhiteSpace(item.Label))
                 throw new InvalidDataException(LocalizationService.T("NameRequired"));
@@ -102,7 +101,7 @@ public sealed class ConfigService
                 !InstalledAppService.IsValidTarget(item.Target))
                 throw new InvalidDataException(LocalizationService.T("InvalidAppTarget"));
             if (item.Type == MenuItemType.LaunchApp && InstalledAppService.IsShellTarget(item.Target) &&
-                !item.Target.Contains('!') && !string.IsNullOrWhiteSpace(item.Arguments))
+                !item.RunAsAdministrator && !item.Target.Contains('!') && !string.IsNullOrWhiteSpace(item.Arguments))
                 throw new InvalidDataException(LocalizationService.T("AppArgumentsNotSupported"));
         }
     }

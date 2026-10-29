@@ -27,7 +27,7 @@
                  SelectionChanged="AppList_SelectionChanged" MouseDoubleClick="AppList_MouseDoubleClick"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button Content="{DynamicResource Cancel}" IsCancel="True" MinWidth="88" Padding="12,6"/>
+            <Button x:Name="CancelButton" Content="{DynamicResource Cancel}" IsCancel="True" MinWidth="88" Padding="12,6"/>
             <Button x:Name="SelectButton" Content="{DynamicResource Select}" IsDefault="True" IsEnabled="False"
                     MinWidth="88" Padding="12,6" Margin="8,0,0,0" Click="SelectButton_Click"/>
         </StackPanel>

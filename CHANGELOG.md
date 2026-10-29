@@ -1,5 +1,37 @@
 # Release notes
 
+## 1.4.9
+
+- Follow Windows' default app mode for native title bars, independently of dial's
+  content theme, and refresh open windows when Windows appearance changes.
+- Avoid double tinting beneath the outer half of the native center outline, keeping its brightness
+  consistent with the sector outlines.
+- Align header feedback beside Save on the same vertical centerline without
+  shifting the layout for long messages. Hover to read complete text in a
+  wrapping tooltip that stays visible for up to one minute.
+- Localize file-in-use, access-denied, missing-file, disk-full, and cancellation
+  reasons. Stop appending raw system exception text to status messages and dialogs.
+- Restore the center outline with the same resting color and width as sector
+  outlines. Synchronize its native geometry with the tint and acrylic mask during
+  growth, shrink, and interrupted animations; release it when the center is hidden.
+- Put success, validation, and save-error messages together in the Settings
+  header beside Save. Keep errors visible until editing or a new result.
+- Replace system-default heavy hover/focus frames with stable themed borders,
+  subtle state fills, and an underline for keyboard focus.
+- Keep invalid settings drafts in the editor with inline validation feedback
+  instead of treating validation failures as fatal application errors.
+- Support administrator launch for installed apps such as Microsoft Store's
+  Windows Terminal through the Windows Shell's native runas command. Detect
+  support from the app's canonical context-menu verbs rather than rejecting all
+  installed-app identities. Preserve launch arguments and Windows UAC consent.
+- Disable elevation only for unsupported app targets and URI shortcuts, with a
+  localized explanation. Share the eligibility check between editing,
+  configuration validation, and launch. Cancelling UAC cancels only the launch.
+- Use square controls in both Settings and the installed-app picker. Match the
+  picker title bar to Windows appearance and request square native window corners
+  on Windows 11 for both windows.
+- Report invalid configurations through the normal load/reload error paths.
+
 ## 1.4.8
 
 - Update the center tint and acrylic mask together during resizing to avoid

@@ -14,6 +14,9 @@ public partial class InstalledAppsWindow : Window
         _apps = apps;
         InitializeComponent();
         AppList.ItemsSource = apps;
+        SourceInitialized += (_, _) => ApplyWindowAppearance();
+        ThemeService.WindowAppearanceChanged += ApplyWindowAppearance;
+        Closed += (_, _) => ThemeService.WindowAppearanceChanged -= ApplyWindowAppearance;
         Loaded += (_, _) =>
         {
             SearchBox.Focus();
@@ -21,6 +24,8 @@ public partial class InstalledAppsWindow : Window
     }
 
     public InstalledApp? SelectedApp => AppList.SelectedItem as InstalledApp;
+
+    private void ApplyWindowAppearance() => ThemeService.ApplyWindowAppearance(this);
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {

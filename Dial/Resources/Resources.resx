@@ -13,8 +13,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="RunAsAdministrator" xml:space="preserve"><value>Run as administrator</value></data>
-  <data name="AdministratorHint" xml:space="preserve"><value>Windows will ask for permission when this app starts. Store apps and URI shortcuts don't support this option.</value></data>
-  <data name="AppElevationNotSupported" xml:space="preserve"><value>To run as administrator, select an executable file. Store apps and URI shortcuts don't support this option.</value></data>
+  <data name="AdministratorHint" xml:space="preserve"><value>Windows will ask for permission when this app starts. Installed apps such as Windows Terminal use the same administrator command as the Windows app menu.</value></data>
+  <data name="AppElevationNotSupported" xml:space="preserve"><value>Windows does not offer Run as administrator for this app target. Choose an app that supports it, or use Browse to select a desktop executable. URI shortcuts cannot request elevation.</value></data>
   <data name="ShowCenterField" xml:space="preserve"><value>Show center button</value></data>
   <data name="InvalidConfiguration" xml:space="preserve"><value>The configuration must contain a JSON object.</value></data>
   <data name="AppName" xml:space="preserve"><value>dial</value></data>
@@ -100,6 +100,11 @@
   <data name="ProgramsFilter" xml:space="preserve"><value>Programs (*.exe;*.lnk;*.cmd;*.bat)|*.exe;*.lnk;*.cmd;*.bat|All files (*.*)|*.*</value></data>
   <data name="ConfigLoadError" xml:space="preserve"><value>Couldn't load your settings. Check the settings file and try again.</value></data>
   <data name="ConfigSaveError" xml:space="preserve"><value>Couldn't save your changes. Check the settings and folder permissions.</value></data>
+  <data name="FileInUseError" xml:space="preserve"><value>The file is in use by another program. Close it and try again.</value></data>
+  <data name="AccessDeniedError" xml:space="preserve"><value>Access was denied. Check the file or folder permissions.</value></data>
+  <data name="FileNotFoundError" xml:space="preserve"><value>The file or folder could not be found. Check its location.</value></data>
+  <data name="DiskFullError" xml:space="preserve"><value>There is not enough disk space. Free some space and try again.</value></data>
+  <data name="OperationCancelledError" xml:space="preserve"><value>The operation was cancelled.</value></data>
   <data name="HotkeyError" xml:space="preserve"><value>Couldn't register the keyboard shortcut. It may be used by another app.</value></data>
   <data name="DisplayError" xml:space="preserve"><value>Couldn't display the dial.</value></data>
   <data name="ActionError" xml:space="preserve"><value>Couldn't complete this action.</value></data>

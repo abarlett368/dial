@@ -13,8 +13,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="RunAsAdministrator" xml:space="preserve"><value>以管理员身份运行</value></data>
-  <data name="AdministratorHint" xml:space="preserve"><value>启动此应用时，Windows 将请求你的许可。Microsoft Store 应用和 URI 快捷方式不支持此选项。</value></data>
-  <data name="AppElevationNotSupported" xml:space="preserve"><value>若要以管理员身份运行，请选择可执行文件。Microsoft Store 应用和 URI 快捷方式不支持此选项。</value></data>
+  <data name="AdministratorHint" xml:space="preserve"><value>启动此应用时，Windows 将请求你的许可。Windows Terminal 等已安装应用使用与 Windows 应用菜单相同的管理员启动命令。</value></data>
+  <data name="AppElevationNotSupported" xml:space="preserve"><value>Windows 未对此应用目标提供“以管理员身份运行”。请选择支持此选项的应用，或使用“浏览”选择桌面程序的可执行文件。URI 快捷方式无法请求提权。</value></data>
   <data name="ShowCenterField" xml:space="preserve"><value>显示圆心按钮</value></data>
   <data name="InvalidConfiguration" xml:space="preserve"><value>配置必须包含一个 JSON 对象。</value></data>
   <data name="AppName" xml:space="preserve"><value>dial</value></data>
@@ -100,6 +100,11 @@
   <data name="ProgramsFilter" xml:space="preserve"><value>程序 (*.exe;*.lnk;*.cmd;*.bat)|*.exe;*.lnk;*.cmd;*.bat|所有文件 (*.*)|*.*</value></data>
   <data name="ConfigLoadError" xml:space="preserve"><value>无法加载你的设置。请检查设置文件后重试。</value></data>
   <data name="ConfigSaveError" xml:space="preserve"><value>无法保存更改。请检查设置和文件夹权限。</value></data>
+  <data name="FileInUseError" xml:space="preserve"><value>文件正被其他程序占用，请关闭占用它的程序后重试。</value></data>
+  <data name="AccessDeniedError" xml:space="preserve"><value>访问被拒绝，请检查文件或文件夹的访问权限。</value></data>
+  <data name="FileNotFoundError" xml:space="preserve"><value>找不到文件或文件夹，请检查其位置。</value></data>
+  <data name="DiskFullError" xml:space="preserve"><value>磁盘空间不足，请释放空间后重试。</value></data>
+  <data name="OperationCancelledError" xml:space="preserve"><value>操作已取消。</value></data>
   <data name="HotkeyError" xml:space="preserve"><value>无法注册键盘快捷键。其他应用可能正在使用此快捷键。</value></data>
   <data name="DisplayError" xml:space="preserve"><value>无法显示轮盘。</value></data>
   <data name="ActionError" xml:space="preserve"><value>无法完成此操作。</value></data>

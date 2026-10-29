@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Dial.Models;
@@ -119,8 +118,10 @@ public partial class MainWindow : Window
         {
             EndShortcutRecording(false);
             _statusTimer?.Stop();
+            ThemeService.WindowAppearanceChanged -= ApplyTitleBarTheme;
         };
         SourceInitialized += (_, _) => ApplyTitleBarTheme();
+        ThemeService.WindowAppearanceChanged += ApplyTitleBarTheme;
     }
 
     private void RefreshItemIcons()
@@ -155,11 +156,7 @@ public partial class MainWindow : Window
 
     private void ApplyTitleBarTheme()
     {
-        IntPtr handle = new WindowInteropHelper(this).Handle;
-        if (handle == IntPtr.Zero) return;
-        int dark = ThemeService.IsDark ? 1 : 0;
-        int result = DwmSetWindowAttribute(handle, 20, ref dark, sizeof(int));
-        if (result < 0) Trace.TraceWarning("The title bar theme is unavailable: 0x{0:X8}", result);
+        ThemeService.ApplyWindowAppearance(this);
     }
 
     private void RebuildLocalizedLists()
@@ -331,6 +328,7 @@ public partial class MainWindow : Window
         ArgsLabel.Visibility = showArgs ? Visibility.Visible : Visibility.Collapsed;
         ArgsBox.Visibility = showArgs ? Visibility.Visible : Visibility.Collapsed;
         AdministratorBox.Visibility = showArgs ? Visibility.Visible : Visibility.Collapsed;
+        UpdateElevationState();
         CmdLabel.Visibility = showCommand ? Visibility.Visible : Visibility.Collapsed;
         CommandBox.Visibility = showCommand ? Visibility.Visible : Visibility.Collapsed;
 
@@ -356,7 +354,24 @@ public partial class MainWindow : Window
     {
         if (_loading || Selected is null) return;
         Selected.Target = TargetBox.Text;
+        UpdateElevationState();
         RefreshSelectedIcon();
+    }
+
+    private void UpdateElevationState()
+    {
+        bool supported = Selected is { Type: MenuItemType.LaunchApp } item &&
+            ActionExecutor.SupportsElevation(item.Target);
+        AdministratorBox.IsEnabled = supported;
+        if (!supported && Selected is { } selected)
+        {
+            selected.RunAsAdministrator = false;
+            AdministratorBox.IsChecked = false;
+        }
+        AdministratorBox.SetResourceReference(ToolTipProperty,
+            supported ? "AdministratorHint" : "AppElevationNotSupported");
+        ElevationHint.Visibility = Selected is { Type: MenuItemType.LaunchApp } app &&
+            !supported && !string.IsNullOrWhiteSpace(app.Target) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ArgsBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -368,7 +383,7 @@ public partial class MainWindow : Window
     private void AdministratorBox_Changed(object sender, RoutedEventArgs e)
     {
         if (_loading || Selected is null) return;
-        Selected.RunAsAdministrator = AdministratorBox.IsChecked == true;
+        Selected.RunAsAdministrator = AdministratorBox.IsEnabled && AdministratorBox.IsChecked == true;
     }
 
     private void IconBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -445,7 +460,8 @@ public partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is COMException or Win32Exception)
         {
-            ErrorService.Report("InstalledAppsError", exception);
+            Trace.TraceError("InstalledAppsError: {0}", exception);
+            ShowStatus(ErrorService.GetMessage("InstalledAppsError", exception), true);
         }
     }
 
@@ -520,17 +536,28 @@ public partial class MainWindow : Window
         _config.LaunchAtStartup = StartupBox.IsChecked == true;
         _config.Items = _items.ToList();
 
+        ClearStatus();
         try
         {
             ConfigService.Validate(_config);
+        }
+        catch (InvalidDataException exception)
+        {
+            Trace.TraceWarning("Configuration validation failed: {0}", exception.Message);
+            ShowStatus(exception.Message, true);
+            return;
+        }
+        try
+        {
             if (SaveRequested is null)
                 throw new InvalidOperationException("No configuration save handler is registered.");
             SaveRequested(ConfigService.Clone(_config));
             ShowTransientStatus(LocalizationService.T("SavedStatus"));
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or Win32Exception or System.Security.SecurityException)
+        catch (Exception exception) when (exception is InvalidDataException or IOException or UnauthorizedAccessException or Win32Exception or System.Security.SecurityException)
         {
-            ErrorService.Report("ConfigSaveError", exception);
+            Trace.TraceError("ConfigSaveError: {0}", exception);
+            ShowStatus(ErrorService.GetMessage("ConfigSaveError", exception), true);
         }
     }
 
@@ -564,12 +591,19 @@ public partial class MainWindow : Window
         StatusText.Visibility = Visibility.Collapsed;
     }
 
-    private void ShowTransientStatus(string message)
+    private void ShowTransientStatus(string message) => ShowStatus(message);
+
+    private void ShowStatus(string message, bool error = false)
     {
+        _statusTimer?.Stop();
         StatusText.Text = message;
+        StatusText.SetResourceReference(TextBlock.ForegroundProperty, error ? "ErrorTextBrush" : "SuccessTextBrush");
+        System.Windows.Automation.AutomationProperties.SetLiveSetting(StatusText, error
+            ? System.Windows.Automation.AutomationLiveSetting.Assertive
+            : System.Windows.Automation.AutomationLiveSetting.Polite);
         StatusText.Visibility = Visibility.Visible;
 
-        _statusTimer?.Stop();
+        if (error) return;
         _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
         _statusTimer.Tick += (_, _) =>
         {
@@ -579,6 +613,4 @@ public partial class MainWindow : Window
         _statusTimer.Start();
     }
 
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
 }

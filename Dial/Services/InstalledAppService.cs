@@ -1,5 +1,8 @@
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -21,9 +24,58 @@ public static class InstalledAppService
         target[TargetPrefix.Length..].All(character => !char.IsControl(character) &&
             character is not ('\\' or '/' or '"' or '<' or '>' or '|'));
 
-    public static void Activate(string target, string arguments)
+    public static bool SupportsElevation(string target)
+    {
+        if (!IsValidTarget(target)) return false;
+        IShellItem? item = null;
+        object? handler = null;
+        IntPtr menu = IntPtr.Zero;
+        try
+        {
+            Guid itemId = ShellItemId;
+            Marshal.ThrowExceptionForHR(SHCreateItemFromParsingName(target, IntPtr.Zero, ref itemId, out item));
+            Guid handlerId = new("3981e225-f559-11d3-8e3a-00c04f6837d5");
+            Guid contextMenuId = typeof(IContextMenu).GUID;
+            item.BindToHandler(IntPtr.Zero, ref handlerId, ref contextMenuId, out handler);
+            var contextMenu = (IContextMenu)handler;
+            menu = CreatePopupMenu();
+            if (menu == IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error());
+            int result = contextMenu.QueryContextMenu(menu, 0, 1, 0x7fff, 0);
+            Marshal.ThrowExceptionForHR(result);
+            var verb = new StringBuilder(256);
+            for (uint index = 0; index < (result & 0xffff); index++)
+            {
+                verb.Clear();
+                if (contextMenu.GetCommandString(new UIntPtr(index), 4, IntPtr.Zero, verb, (uint)verb.Capacity) >= 0 &&
+                    string.Equals(verb.ToString(), "runas", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+        catch (Exception exception) when (exception is COMException or IOException or UnauthorizedAccessException)
+        {
+            Trace.TraceWarning("The installed app's elevation support could not be read for {0}: {1}",
+                target, exception.Message);
+            return false;
+        }
+        finally
+        {
+            if (menu != IntPtr.Zero) DestroyMenu(menu);
+            if (handler is not null) Marshal.ReleaseComObject(handler);
+            if (item is not null) Marshal.ReleaseComObject(item);
+        }
+    }
+
+    public static void Activate(string target, string arguments, bool runAsAdministrator = false)
     {
         if (!IsValidTarget(target)) throw new ArgumentException(LocalizationService.T("InvalidAppTarget"));
+        if (runAsAdministrator)
+        {
+            if (!SupportsElevation(target))
+                throw new InvalidOperationException(LocalizationService.T("AppElevationNotSupported"));
+            ActivateElevated(target, arguments);
+            return;
+        }
         string id = target[TargetPrefix.Length..];
         if (!id.Contains('!'))
         {
@@ -40,6 +92,25 @@ public static class InstalledAppService
         finally { Marshal.ReleaseComObject(manager); }
     }
 
+    private static void ActivateElevated(string target, string arguments)
+    {
+        Marshal.ThrowExceptionForHR(SHParseDisplayName(target, IntPtr.Zero, out IntPtr itemId, 0, out _));
+        try
+        {
+            var info = new ShellExecuteInfo
+            {
+                Size = Marshal.SizeOf<ShellExecuteInfo>(),
+                Mask = 0x0000000c | 0x00000100 | 0x00000400, // Invoke the item's verb synchronously; report errors ourselves.
+                Verb = "runas",
+                Parameters = arguments,
+                Show = 1,
+                ItemIdList = itemId,
+            };
+            if (!ShellExecuteEx(ref info)) throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+        finally { Marshal.FreeCoTaskMem(itemId); }
+    }
+
     public static IReadOnlyList<InstalledApp> GetApps()
     {
         Guid itemId = ShellItemId;
@@ -48,7 +119,8 @@ public static class InstalledAppService
         {
             Guid handler = new("94f60519-2850-4924-aa5a-d15e84868039");
             Guid enumId = typeof(IEnumShellItems).GUID;
-            folder.BindToHandler(IntPtr.Zero, ref handler, ref enumId, out var enumerator);
+            folder.BindToHandler(IntPtr.Zero, ref handler, ref enumId, out var bound);
+            var enumerator = (IEnumShellItems)bound;
             try
             {
                 var apps = new List<InstalledApp>();
@@ -116,7 +188,8 @@ public static class InstalledAppService
     [ComImport, Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IShellItem
     {
-        void BindToHandler(IntPtr context, ref Guid handler, ref Guid id, out IEnumShellItems items);
+        void BindToHandler(IntPtr context, ref Guid handler, ref Guid id,
+            [MarshalAs(UnmanagedType.Interface)] out object value);
         void GetParent(out IShellItem parent);
         void GetDisplayName(uint format, out IntPtr name);
         void GetAttributes(uint mask, out uint attributes);
@@ -148,11 +221,50 @@ public static class InstalledAppService
         void ActivateForProtocol([MarshalAs(UnmanagedType.LPWStr)] string id, IntPtr items, out uint processId);
     }
 
+    [ComImport, Guid("000214e4-0000-0000-c000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IContextMenu
+    {
+        [PreserveSig] int QueryContextMenu(IntPtr menu, uint index, uint firstId, uint lastId, uint flags);
+        void InvokeCommand(IntPtr info);
+        [PreserveSig] int GetCommandString(UIntPtr command, uint flags, IntPtr reserved,
+            [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder name, uint capacity);
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct ShellExecuteInfo
+    {
+        public int Size;
+        public uint Mask;
+        public IntPtr Window;
+        [MarshalAs(UnmanagedType.LPWStr)] public string? Verb;
+        [MarshalAs(UnmanagedType.LPWStr)] public string? File;
+        [MarshalAs(UnmanagedType.LPWStr)] public string? Parameters;
+        [MarshalAs(UnmanagedType.LPWStr)] public string? Directory;
+        public int Show;
+        public IntPtr Instance;
+        public IntPtr ItemIdList;
+        [MarshalAs(UnmanagedType.LPWStr)] public string? Class;
+        public IntPtr ClassKey;
+        public uint HotKey;
+        public IntPtr IconOrMonitor;
+        public IntPtr Process;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     private struct NativeSize { public int Width, Height; }
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
     private static extern int SHCreateItemFromParsingName(string path, IntPtr context, ref Guid id, out IShellItem item);
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SHParseDisplayName(string name, IntPtr context, out IntPtr itemId, uint attributes, out uint found);
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShellExecuteEx(ref ShellExecuteInfo info);
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr CreatePopupMenu();
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyMenu(IntPtr menu);
     [DllImport("gdi32.dll")]
     private static extern bool DeleteObject(IntPtr handle);
 }

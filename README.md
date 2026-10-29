@@ -30,8 +30,9 @@ The app requires 64-bit Windows 10, version 1809 or later, or Windows 11.
 
 The dial supports up to 16 actions. Configure an action to open an app, file,
 folder, or URL; run a Windows command or script; or paste saved text. You can
-also choose a theme and an icon-and-label layout. Some executable actions can
-request administrator access through Windows User Account Control (UAC).
+also choose a theme and an icon-and-label layout. Supported executable actions
+and installed apps such as Windows Terminal can request administrator access
+through Windows User Account Control (UAC).
 
 Settings are stored per user in
 `%LOCALAPPDATA%\dial\settings.json`. They remain in place when you replace the

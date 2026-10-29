@@ -1,4 +1,7 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using Microsoft.Win32;
 
@@ -9,6 +12,7 @@ public static class ThemeService
     private const string MarkerKey = "Dial.Theme";
     private static readonly Windows.UI.ViewManagement.UISettings WindowsSettings = new();
     private static Windows.UI.Color _lastWindowsAccent = WindowsAccent;
+    private static bool _systemUsesDarkTitleBar = ReadSystemUsesDarkTitleBar();
     public static Windows.UI.Color WindowsAccent =>
         WindowsSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
 
@@ -17,6 +21,23 @@ public static class ThemeService
     public static bool IsDark => CurrentTheme != "Light";
 
     public static event Action? ThemeChanged;
+    public static event Action? WindowAppearanceChanged;
+
+    public static void ApplyWindowAppearance(Window window)
+    {
+        IntPtr handle = new WindowInteropHelper(window).Handle;
+        if (handle == IntPtr.Zero) return;
+        int dark = _systemUsesDarkTitleBar && !SystemParameters.HighContrast ? 1 : 0;
+        int attribute = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18985) ? 20 : 19;
+        int result = DwmSetWindowAttribute(handle, attribute, ref dark, sizeof(int));
+        if (result < 0) Trace.TraceWarning("The title bar theme is unavailable: 0x{0:X8}", result);
+        if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
+        {
+            int square = 1;
+            result = DwmSetWindowAttribute(handle, 33, ref square, sizeof(int));
+            if (result < 0) Trace.TraceWarning("Square window corners are unavailable: 0x{0:X8}", result);
+        }
+    }
 
     static ThemeService()
     {
@@ -24,7 +45,11 @@ public static class ThemeService
         SystemEvents.UserPreferenceChanged += (_, _) =>
         {
             if (Application.Current is { } app && !app.Dispatcher.HasShutdownStarted)
-                app.Dispatcher.BeginInvoke(() => SetTheme(CurrentTheme));
+                app.Dispatcher.BeginInvoke(() =>
+                {
+                    RefreshWindowAppearance(ReadSystemUsesDarkTitleBar());
+                    SetTheme(CurrentTheme);
+                });
         };
     }
 
@@ -33,11 +58,25 @@ public static class ThemeService
         if (Application.Current is { } app && !app.Dispatcher.HasShutdownStarted)
             app.Dispatcher.BeginInvoke(() =>
             {
+                RefreshWindowAppearance(ReadSystemUsesDarkTitleBar());
                 var accent = WindowsAccent;
                 if (accent.Equals(_lastWindowsAccent)) return;
                 _lastWindowsAccent = accent;
                 SetTheme(CurrentTheme);
             });
+    }
+
+    private static bool ReadSystemUsesDarkTitleBar()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(
+            @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+        return key?.GetValue("AppsUseLightTheme") is int value && value == 0;
+    }
+
+    private static void RefreshWindowAppearance(bool dark)
+    {
+        _systemUsesDarkTitleBar = dark;
+        WindowAppearanceChanged?.Invoke();
     }
 
     public static void SetTheme(string theme)
@@ -65,6 +104,8 @@ public static class ThemeService
     {
         var d = new ResourceDictionary { [MarkerKey] = true };
         d["SuccessTextBrush"] = Freeze(IsDark ? "#6CCB5F" : "#0F6C0F");
+        d["ErrorTextBrush"] = Freeze(IsDark ? "#FF99A4" : "#A80000");
+        d["FocusIndicatorBrush"] = Freeze(IsDark ? "#B0B0B0" : "#777777");
         d["SelectionBackgroundBrush"] = Freeze(IsDark ? "#454545" : "#E5E5E5");
         d["SelectionForegroundBrush"] = Freeze(IsDark ? "#FFFFFF" : "#1A1A1A");
 
@@ -101,7 +142,7 @@ public static class ThemeService
         {
             foreach (string key in new[] { "AppBackgroundBrush", "ControlBackgroundBrush", "PanelBackgroundBrush", "InputBackgroundBrush" })
                 d[key] = SystemColors.WindowBrush;
-            foreach (string key in new[] { "AppForegroundBrush", "SecondaryTextBrush", "FieldLabelBrush", "ControlBorderBrush", "SuccessTextBrush" })
+            foreach (string key in new[] { "AppForegroundBrush", "SecondaryTextBrush", "FieldLabelBrush", "ControlBorderBrush", "SuccessTextBrush", "ErrorTextBrush", "FocusIndicatorBrush" })
                 d[key] = SystemColors.WindowTextBrush;
             d["AccentBrush"] = SystemColors.HighlightBrush;
             d["AccentHoverBrush"] = SystemColors.HighlightBrush;
@@ -120,4 +161,7 @@ public static class ThemeService
         brush.Freeze();
         return brush;
     }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
 }

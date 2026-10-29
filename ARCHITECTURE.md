@@ -34,6 +34,20 @@ and malformed JSON are reported; existing data is not silently overwritten.
 Settings edits are drafts. Save validates and persists the draft before
 applying it. The optional startup entry contains the current executable path.
 Tests use `--config <path>` to isolate configuration from the user's profile.
+Validation failures stay in the editor as localized inline feedback; they do not
+reach the application's fatal unhandled-exception handler. Load and reload also
+handle invalid configuration through their normal error paths.
+Success, validation, and save-error feedback share the header status area next
+to Save. Errors persist until editing or another result replaces them; success
+expires after three seconds. Screen readers receive assertive error and polite
+success live-region settings.
+Status text is right-aligned 16 DIPs before Save, vertically centered and
+single-line with ellipsis and a full-text tooltip, keeping header/body geometry
+stable for long messages. `ErrorService.GetMessage` maps exception types and
+Win32/HRESULT error codes to localized reasons for inline and dialog errors.
+Unknown failures retain their localized operation message; raw exception details
+are logged rather than appended to the interface. Draft validation retains its
+specific localized field messages.
 
 The configuration contains the hotkey, theme, language, accent, item layout,
 center visibility, startup choice, and up to 16 actions. The first-run defaults
@@ -59,7 +73,7 @@ the WPF dial, hit testing, native material masks, and icon generator.
 Sector zero starts at 12 o'clock; items proceed clockwise. Selection scales each
 sector around its own bounds. The center radius animates independently of layout;
 content is measured before animation, not from the per-frame callback. The
-center's native material mask and native tint update together throughout resize.
+center's native material mask, tint, and outline update together throughout resize.
 Layout searches resolve each sector's combined geometry to an outlined path once,
 instead of evaluating all Boolean cuts for every candidate rectangle. Exact
 content-clearance checks remain in place.
@@ -68,7 +82,7 @@ content-clearance checks remain in place.
 When system backdrop composition is available, [`NativeBackdrop`](Dial/Services/NativeBackdrop.cs)
 creates a native material host behind it. One stationary material visual serves
 all sectors and the visible center disk through a shared composition geometry
-clip. Center tint is also rendered natively and submitted with the same mask
+clip. Center tint and outline are also rendered natively and submitted with the same mask
 update; WPF only draws its text and invisible interaction geometry in acrylic
 mode. This avoids a WPF fill expanding before the native blur catches up.
 Clear gaps remain transparent.
@@ -155,13 +169,32 @@ The standard theme foreground stays fixed outside Windows High Contrast.
 Normal outlines retain the fill's tint and alpha, darkened by 12/255 in light
 mode or lightened by 18/255 in dark mode. Leaving the outline nearly transparent
 would expose untinted native blur around the fill and produce a contrasting rim.
-Outline tint follows the same selection animation. Acrylic center tint has no
-separate outline. High Contrast keeps system outlines unchanged.
+Outline tint follows the same selection animation. The center uses the same
+resting outline color and width as the sectors. In acrylic mode an even-odd
+native annulus follows the center ellipse, with its inner edge inset by the
+outline width in physical pixels.
+The native tint ends at the logical disk radius, matching a WPF fill beneath a
+centered stroke. It does not extend beneath the outer half of the outline:
+double tinting there would brighten the rim compared with sector strokes.
+Material, tint, and outline paths commit in the same rendering callback,
+including interrupted resizing; no separate WPF
+stroke can race the native mask. Hiding or rebuilding the center releases the
+outline's visuals and geometry sources. High Contrast keeps system outlines unchanged.
 
 [`Controls.xaml`](Dial/Resources/Controls.xaml) shares neutral buttons, gray list
 selection, input borders, and non-layout-changing keyboard focus visuals
-between Settings and the installed-app picker. Settings overrides the shared
-corner resources to zero; the installed-app picker retains its rounded controls.
+between Settings and the installed-app picker. Shared control and focus corners
+are square in both windows. `ThemeService.ApplyWindowAppearance` applies the
+native title bar theme and, on Windows 11, requests square native window corners.
+Title bars read Windows' `AppsUseLightTheme` preference, not `CurrentTheme`.
+Both Windows color and user-preference notifications refresh a separate
+`WindowAppearanceChanged` event even when the accent color is unchanged.
+Settings and the installed-app picker subscribe while open and unsubscribe
+when closed; content colors remain controlled by dial's own theme.
+Hover and pressed states change fills without introducing heavy black borders;
+keyboard focus uses an underline without changing control dimensions.
+The installed-app picker refreshes its native appearance on system appearance changes and
+unsubscribes when closed.
 Save previews the selected palette
 color with a contrasting button label. This window-local preview does not change
 the active dial or persist the draft. System-color refreshes update it through
@@ -179,8 +212,21 @@ contain the same resource keys. Keep new interface text in these resource files.
 launches, files and folders, URLs, system commands, scripts, and clipboard
 snippets. Configured commands and scripts are local user input and run with the
 user's permissions. Elevation is an opt-in property of supported executable
-launches; Windows displays the UAC prompt. The dial process itself remains
+and installed-app launches; Windows displays the UAC prompt. The dial process itself remains
 unelevated.
+`ActionExecutor.SupportsElevation` is shared by the editor, configuration
+validation, and launch preparation. Installed apps are queried through
+`IShellItem.BindToHandler(BHID_SFUIObject)` and `IContextMenu.GetCommandString`
+for the canonical `runas` verb, independent of the menu's display language.
+Supported identities, including Windows Terminal, are elevated using
+`ShellExecuteEx` with their absolute Shell item ID list and the native `runas`
+verb. Arguments are passed without launching an elevated copy of dial or
+resolving version-specific package executable paths. Normal packaged activation
+continues to use `IApplicationActivationManager`; normal desktop identities
+continue to use Explorer. UAC cancellation is logged without reporting an error.
+URI shortcuts cannot request elevation. Changing to an unsupported target clears
+the draft's elevation flag, disables the checkbox, and shows a localized
+explanation directing the user to a supported app or an executable selected with Browse.
 
 [`InstalledAppService`](Dial/Services/InstalledAppService.cs) enumerates Windows
 applications and activates supported packaged apps. [`TrayIconService`](Dial/Services/TrayIconService.cs)

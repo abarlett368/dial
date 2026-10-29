@@ -8,6 +8,11 @@ namespace Dial.Services;
 
 public static class ActionExecutor
 {
+    public static bool SupportsElevation(string target) =>
+        !string.IsNullOrWhiteSpace(target) && (InstalledAppService.IsShellTarget(target)
+            ? InstalledAppService.SupportsElevation(target)
+            : !Uri.TryCreate(Environment.ExpandEnvironmentVariables(target), UriKind.Absolute, out var uri) || uri.IsFile);
+
     public static async void Execute(MenuItemModel item)
     {
         try
@@ -33,6 +38,10 @@ public static class ActionExecutor
                     break;
             }
         }
+        catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
+        {
+            Trace.TraceInformation("The user cancelled the administrator launch: {0}", exception.Message);
+        }
         catch (Exception ex)
         {
             ErrorService.Report("ActionError", ex);
@@ -43,9 +52,7 @@ public static class ActionExecutor
     {
         if (InstalledAppService.IsShellTarget(item.Target))
         {
-            if (item.RunAsAdministrator)
-                throw new InvalidOperationException(LocalizationService.T("AppElevationNotSupported"));
-            InstalledAppService.Activate(item.Target, item.Arguments);
+            InstalledAppService.Activate(item.Target, item.Arguments, item.RunAsAdministrator);
             return;
         }
         Process.Start(CreateAppStartInfo(item));
@@ -54,7 +61,7 @@ public static class ActionExecutor
     public static ProcessStartInfo CreateAppStartInfo(MenuItemModel item)
     {
         if (item.Type != MenuItemType.LaunchApp || InstalledAppService.IsShellTarget(item.Target) ||
-            item.RunAsAdministrator && Uri.TryCreate(item.Target, UriKind.Absolute, out var uri) && !uri.IsFile)
+            item.RunAsAdministrator && !SupportsElevation(item.Target))
             throw new ArgumentException(LocalizationService.T("AppElevationNotSupported"), nameof(item));
         return new ProcessStartInfo
         {

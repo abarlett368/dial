@@ -403,7 +403,7 @@ public partial class RadialWindow : Window
     private void AddCenterFill()
     {
         bool native = BackdropKind != BackdropKind.Opaque;
-        if (native) _backdrop!.SetCenterTint(_normalColor);
+        if (native) _backdrop!.SetCenterTint(_normalColor, SectorOutlineColor(_normalColor));
         _centerGeometry = new EllipseGeometry(new Point(_cx, _cy), CurrentCenterRadius, CurrentCenterRadius);
         var centerEllipse = new Path
         {

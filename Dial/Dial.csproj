@@ -11,7 +11,7 @@
     <AssemblyName>dial</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\dial.ico</ApplicationIcon>
-    <Version>1.4.8</Version>
+    <Version>1.4.9</Version>
     <Product>dial</Product>
     <Title>dial</Title>
     <Authors>abarlett368</Authors>

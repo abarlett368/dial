@@ -15,10 +15,9 @@
         <ResourceDictionary.MergedDictionaries>
             <ResourceDictionary Source="Resources/Controls.xaml"/>
         </ResourceDictionary.MergedDictionaries>
-        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="FocusCornerRadius">0</CornerRadius>
 
         <Style x:Key="ComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Padding" Value="10,6"/>
@@ -49,6 +48,7 @@
         </Style>
 
         <Style TargetType="ComboBox">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyboardFocusVisual}"/>
             <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
@@ -58,7 +58,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
-                        <Grid>
+                        <Grid x:Name="Root">
                             <ToggleButton x:Name="ToggleButton"
                                           Focusable="False"
                                           ClickMode="Press"
@@ -72,12 +72,12 @@
                                                 CornerRadius="0" SnapsToDevicePixels="True"/>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="ButtonBorder" Property="BorderBrush"
-                                                        Value="{DynamicResource AppForegroundBrush}"/>
+                                                <Setter TargetName="ButtonBorder" Property="Background"
+                                                        Value="{DynamicResource ControlHoverBrush}"/>
                                             </Trigger>
                                             <Trigger Property="IsChecked" Value="True">
-                                                <Setter TargetName="ButtonBorder" Property="BorderBrush"
-                                                        Value="{DynamicResource AppForegroundBrush}"/>
+                                                <Setter TargetName="ButtonBorder" Property="Background"
+                                                        Value="{DynamicResource SelectionBackgroundBrush}"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -115,6 +115,11 @@
                                 </Border>
                             </Popup>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -151,7 +156,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid x:Name="HeaderRow" Grid.Row="0" Margin="24,18,24,10">
@@ -166,13 +170,23 @@
                 <TextBlock x:Name="VersionText" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"
                            VerticalAlignment="Bottom" Margin="10,0,0,3"/>
             </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{DynamicResource SuccessTextBrush}"
-                           AutomationProperties.LiveSetting="Polite"
-                           Margin="0,0,12,0" Visibility="Collapsed"/>
-                <Button x:Name="SaveButton" Content="{DynamicResource Save}" MinWidth="88" Height="32"
-                        Style="{StaticResource AccentButton}" Click="SaveButton_Click"/>
-            </StackPanel>
+            <TextBlock x:Name="StatusText" Grid.Column="1" VerticalAlignment="Center"
+                       TextAlignment="Right"
+                       Foreground="{DynamicResource SuccessTextBrush}" TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis"
+                       AutomationProperties.LiveSetting="Polite"
+                       ToolTipService.InitialShowDelay="400" ToolTipService.ShowDuration="60000"
+                       Margin="20,0,16,0" Visibility="Collapsed">
+                <TextBlock.ToolTip>
+                    <ToolTip x:Name="StatusToolTip">
+                        <TextBlock Text="{Binding PlacementTarget.Text, RelativeSource={RelativeSource AncestorType=ToolTip}}"
+                                   MaxWidth="480" TextWrapping="Wrap"/>
+                    </ToolTip>
+                </TextBlock.ToolTip>
+            </TextBlock>
+            <Button x:Name="SaveButton" Grid.Column="2" VerticalAlignment="Center"
+                    Content="{DynamicResource Save}" MinWidth="88" Height="32"
+                    Style="{StaticResource AccentButton}" Click="SaveButton_Click"/>
         </Grid>
 
         <Grid x:Name="BodyGrid" Grid.Row="1" Margin="24,0,24,16">
@@ -315,7 +329,11 @@
                                      TextChanged="ArgsBox_TextChanged"/>
                             <CheckBox x:Name="AdministratorBox" Content="{DynamicResource RunAsAdministrator}"
                                       ToolTip="{DynamicResource AdministratorHint}" Margin="0,10,0,0"
+                                      ToolTipService.ShowOnDisabled="True"
                                       Checked="AdministratorBox_Changed" Unchecked="AdministratorBox_Changed"/>
+                            <TextBlock x:Name="ElevationHint" Text="{DynamicResource AppElevationNotSupported}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap"
+                                       Margin="0,6,0,0" Visibility="Collapsed"/>
 
                             <TextBlock x:Name="CmdLabel" Text="{DynamicResource CommandField}" Style="{StaticResource FieldLabel}"/>
                             <ComboBox x:Name="CommandBox" AutomationProperties.Name="{DynamicResource CommandField}"
