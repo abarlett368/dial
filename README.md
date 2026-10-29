@@ -66,5 +66,5 @@ settings are not part of the repository.
 
 ## Copyright
 
-Copyright © 2026 abarlett368. All rights reserved. No license is granted to use,
+Copyright 2026 abarlett368. All rights reserved. No license is granted to use,
 modify, or distribute this software.
