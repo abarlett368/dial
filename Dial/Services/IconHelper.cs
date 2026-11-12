@@ -145,13 +145,13 @@ public static class IconHelper
             var bmp = new BitmapImage();
             bmp.BeginInit();
             bmp.CacheOption = BitmapCacheOption.OnLoad;
-            bmp.UriSource = new Uri(path, UriKind.Absolute);
+            bmp.UriSource = new Uri(Path.GetFullPath(path), UriKind.Absolute);
             bmp.EndInit();
             bmp.Freeze();
             return bmp;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
-            or NotSupportedException or ArgumentException)
+            or NotSupportedException or ArgumentException or FileFormatException)
         {
             Trace.TraceWarning("Could not load icon {0}: {1}", path, exception.Message);
             return null;

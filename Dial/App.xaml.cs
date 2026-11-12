@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using System.Runtime.InteropServices;
 using System.Windows;
 using Dial.Models;
 using Dial.Services;
@@ -8,6 +9,8 @@ namespace Dial;
 
 public partial class App : Application
 {
+    public static string DisplayVersion => $"v{typeof(App).Assembly.GetName().Version!.ToString(3)}";
+
     private ConfigService _configService = new();
     private MenuConfig _config = new();
     private HotkeyService? _hotkeys;
@@ -15,10 +18,14 @@ public partial class App : Application
     private MainWindow? _settings;
     private TrayIconService? _tray;
     private SingleInstanceService? _singleInstance;
+    private readonly SemaphoreSlim _configurationGate = new(1, 1);
+    private bool _openingSettings;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        ErrorService.InitializeLog(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "dial", "logs"));
         int configArgument = Array.IndexOf(e.Args, "--config");
         if (configArgument >= 0)
         {
@@ -98,31 +105,44 @@ public partial class App : Application
         _radial?.ShowMenu(_config.Items, _config.ShowAtMouse, _config.HoverColor, _config.IconMode, _config.ShowCenter);
     }
 
-    private void ShowSettings()
+    private async void ShowSettings()
     {
-        if (_settings is null)
+        if (_openingSettings) return;
+        _openingSettings = true;
+        try
         {
-            _settings = new MainWindow(_config)
+            if (_settings is null)
             {
-                SaveRequested = updated =>
+                if (StartupService.IsPackaged)
+                    _config.LaunchAtStartup = await StartupService.IsEnabledAsync();
+                _settings = new MainWindow(_config)
                 {
-                    CommitConfiguration(updated, true);
-                    LocalizationService.SetLanguage(updated.Language);
-                    ThemeService.SetTheme(updated.Theme);
-                }
-            };
-            _settings.ShortcutRecordingChanged += recording =>
-            {
-                if (recording) _hotkeys!.UnregisterAll();
-                else TryRegisterHotkey();
-            };
-            _settings.Closed += (_, _) => _settings = null;
-        }
+                    SaveRequested = async updated =>
+                    {
+                        await CommitConfigurationAsync(() => updated, true);
+                        LocalizationService.SetLanguage(updated.Language);
+                        ThemeService.SetTheme(updated.Theme);
+                    }
+                };
+                _settings.ShortcutRecordingChanged += recording =>
+                {
+                    if (recording) _hotkeys!.UnregisterAll();
+                    else TryRegisterHotkey();
+                };
+                _settings.Closed += (_, _) => _settings = null;
+            }
 
-        _settings.Show();
-        _settings.Activate();
-        if (_settings.WindowState == WindowState.Minimized)
-            _settings.WindowState = WindowState.Normal;
+            _settings.Show();
+            _settings.Activate();
+            if (_settings.WindowState == WindowState.Minimized)
+                _settings.WindowState = WindowState.Normal;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
+            or System.ComponentModel.Win32Exception or COMException or System.Security.SecurityException)
+        {
+            ErrorService.Report("ConfigLoadError", exception);
+        }
+        finally { _openingSettings = false; }
     }
 
     private void OnLanguageChanged()
@@ -138,16 +158,15 @@ public partial class App : Application
         _radial?.RefreshAppearance();
     }
 
-    private void ReloadConfig()
+    private async void ReloadConfig()
     {
         try
         {
-            var config = _configService.Load();
-            CommitConfiguration(config, false);
+            await CommitConfigurationAsync(_configService.Load, false);
             _settings?.Close();
         }
         catch (Exception exception) when (exception is InvalidDataException or IOException or UnauthorizedAccessException or JsonException
-            or System.ComponentModel.Win32Exception or System.Security.SecurityException)
+            or System.ComponentModel.Win32Exception or COMException or System.Security.SecurityException)
         {
             ErrorService.Report("ConfigLoadError", exception);
             return;
@@ -157,30 +176,38 @@ public partial class App : Application
         _tray?.Notify(LocalizationService.T("AppName"), LocalizationService.T("ReloadNotification"));
     }
 
-    private void CommitConfiguration(MenuConfig updated, bool persist)
+    private async Task CommitConfigurationAsync(Func<MenuConfig> readConfiguration, bool persist)
     {
-        ConfigService.Validate(updated);
-        _hotkeys!.Register(updated.Hotkey);
+        await _configurationGate.WaitAsync();
         try
         {
-            StartupService.SetEnabled(updated.LaunchAtStartup);
-            if (persist) _configService.Save(updated);
-        }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or System.Security.SecurityException)
-        {
+            var updated = readConfiguration();
+            ConfigService.Validate(updated);
+            bool startupWasEnabled = await StartupService.IsEnabledAsync();
+            _hotkeys!.Register(updated.Hotkey);
             try
             {
-                _hotkeys.Register(_config.Hotkey);
-                StartupService.SetEnabled(_config.LaunchAtStartup);
+                await StartupService.SetEnabledAsync(updated.LaunchAtStartup);
+                if (persist) _configService.Save(updated);
             }
-            catch (Exception rollback) when (rollback is IOException or UnauthorizedAccessException
-                or System.Security.SecurityException or System.ComponentModel.Win32Exception)
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
+                or System.ComponentModel.Win32Exception or COMException or System.Security.SecurityException)
             {
-                throw new IOException(LocalizationService.T("RollbackError"), new AggregateException(exception, rollback));
+                try
+                {
+                    _hotkeys.Register(_config.Hotkey);
+                    await StartupService.SetEnabledAsync(startupWasEnabled);
+                }
+                catch (Exception rollback) when (rollback is IOException or UnauthorizedAccessException
+                    or System.Security.SecurityException or System.ComponentModel.Win32Exception or COMException)
+                {
+                    throw new IOException(LocalizationService.T("RollbackError"), new AggregateException(exception, rollback));
+                }
+                throw;
             }
-            throw;
+            _config = updated;
         }
-        _config = updated;
+        finally { _configurationGate.Release(); }
     }
 
     private void ExitApplication()

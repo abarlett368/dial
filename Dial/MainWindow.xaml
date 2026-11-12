@@ -164,12 +164,21 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="{DynamicResource AppName}" FontSize="24" FontWeight="SemiBold"
-                           VerticalAlignment="Center"/>
-                <TextBlock x:Name="VersionText" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"
-                           VerticalAlignment="Bottom" Margin="10,0,0,3"/>
-            </StackPanel>
+            <Grid Width="{Binding ActualWidth, ElementName=LeftPanel}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource AppName}" FontSize="24" FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <TextBlock x:Name="VersionText" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"
+                               VerticalAlignment="Bottom" Margin="10,0,0,3"/>
+                </StackPanel>
+                <Button x:Name="AboutButton" Grid.Column="2" Content="{DynamicResource About}"
+                        MinWidth="88" Height="28" VerticalAlignment="Center" Click="AboutButton_Click"/>
+            </Grid>
             <TextBlock x:Name="StatusText" Grid.Column="1" VerticalAlignment="Center"
                        TextAlignment="Right"
                        Foreground="{DynamicResource SuccessTextBrush}" TextWrapping="NoWrap"

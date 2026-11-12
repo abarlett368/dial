@@ -1,36 +1,30 @@
 # Release notes
 
+## 1.4.10
+
+- Give the app icon a frosted finish and stronger outlines.
+- Add an About window with version, author, project link, and copyright information.
+- Add Microsoft Store packaging for Dial Menu, with Windows-managed startup.
+- Show startup restrictions in Settings and prevent overlapping saves.
+- Fix a tray icon recovery error that could close dial.
+- Update the wheel's background, text, and clickable areas when display scaling changes.
+- Fix custom icons loaded from relative paths and fall back safely for damaged images.
+- Hide the unused background window when Acrylic is unavailable.
+- Add rotating local error logs without saving clipboard text or settings.
+- Cancel pasting if focus has moved away from the original window.
+
 ## 1.4.9
 
-- Follow Windows' default app mode for native title bars, independently of dial's
-  content theme, and refresh open windows when Windows appearance changes.
-- Avoid double tinting beneath the outer half of the native center outline, keeping its brightness
-  consistent with the sector outlines.
-- Align header feedback beside Save on the same vertical centerline without
-  shifting the layout for long messages. Hover to read complete text in a
-  wrapping tooltip that stays visible for up to one minute.
-- Localize file-in-use, access-denied, missing-file, disk-full, and cancellation
-  reasons. Stop appending raw system exception text to status messages and dialogs.
-- Restore the center outline with the same resting color and width as sector
-  outlines. Synchronize its native geometry with the tint and acrylic mask during
-  growth, shrink, and interrupted animations; release it when the center is hidden.
-- Put success, validation, and save-error messages together in the Settings
-  header beside Save. Keep errors visible until editing or a new result.
-- Replace system-default heavy hover/focus frames with stable themed borders,
-  subtle state fills, and an underline for keyboard focus.
-- Keep invalid settings drafts in the editor with inline validation feedback
-  instead of treating validation failures as fatal application errors.
-- Support administrator launch for installed apps such as Microsoft Store's
-  Windows Terminal through the Windows Shell's native runas command. Detect
-  support from the app's canonical context-menu verbs rather than rejecting all
-  installed-app identities. Preserve launch arguments and Windows UAC consent.
-- Disable elevation only for unsupported app targets and URI shortcuts, with a
-  localized explanation. Share the eligibility check between editing,
-  configuration validation, and launch. Cancelling UAC cancels only the launch.
-- Use square controls in both Settings and the installed-app picker. Match the
-  picker title bar to Windows appearance and request square native window corners
-  on Windows 11 for both windows.
-- Report invalid configurations through the normal load/reload error paths.
+- Let title bars follow Windows' light or dark mode independently of dial's theme.
+- Restore the center outline and keep it aligned with the Acrylic background during resizing.
+- Move save results and validation messages beside Save. Hover over long messages to read them in full.
+- Show translated error explanations instead of raw system exceptions.
+- Keep invalid settings open for correction rather than closing the application.
+- Allow supported installed apps, including Windows Terminal, to run as administrator.
+  Explain when elevation is unavailable; cancelling UAC leaves dial running.
+- Use square controls and lighter hover and keyboard-focus indicators in Settings
+  and the app picker, with square window corners on Windows 11.
+- Report invalid configuration files when loading or reloading them.
 
 ## 1.4.8
 
@@ -114,7 +108,7 @@
 
 ## 1.4.2
 
-- Introduced the approved frosted translucent icon with an empty center.
+- Introduced a frosted translucent icon with an empty center.
 - Improved diagonal label fitting, shutdown behavior, shortcut validation,
   and boundary coverage.
 - Fixed native material/content window ordering and dispatcher-queue lifetime.

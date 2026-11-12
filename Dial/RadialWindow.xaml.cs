@@ -67,6 +67,7 @@ public partial class RadialWindow : Window
     private EventHandler? _pendingEntry;
     private EventHandler? _pendingDismiss;
     private int _presentationVersion;
+    private bool _dpiRefreshPending;
 
     public BackdropKind BackdropKind => _backdrop?.Kind ?? BackdropKind.Opaque;
 
@@ -89,7 +90,21 @@ public partial class RadialWindow : Window
             StopTrackingAnimation();
         }
         UpdateNativeShape();
+        if (!_trackingAnimation && !_centerAnimating && !_sectorAnimating)
+            _backdrop.SetHitRegion(VisualTreeHelper.GetDpi(this), CurrentCenterRadius, !_showCenter, _selectedIndex);
         _backdrop.Show();
+    }
+
+    protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
+    {
+        base.OnDpiChanged(oldDpi, newDpi);
+        if (_closed || _backdrop is null || !IsVisible || _dpiRefreshPending) return;
+        _dpiRefreshPending = true;
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+        {
+            _dpiRefreshPending = false;
+            if (!_closed) RefreshAppearance();
+        });
     }
 
     public RadialWindow(bool allowBackdrop = true)
@@ -190,15 +205,23 @@ public partial class RadialWindow : Window
         var info = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
         if (!GetMonitorInfo(monitor, ref info)) throw new Win32Exception(Marshal.GetLastWin32Error());
         Marshal.ThrowExceptionForHR(GetDpiForMonitor(monitor, MonitorDpiTypeEffective, out uint dpiX, out uint dpiY));
+        var bounds = CalculatePosition(p, info.WorkArea, dpiX, dpiY, showAtMouse);
+        var hwnd = new WindowInteropHelper(this).EnsureHandle();
+        if (!SetWindowPos(hwnd, IntPtr.Zero, bounds.Left, bounds.Top,
+            bounds.Right - bounds.Left, bounds.Bottom - bounds.Top, 0x0014))
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        return bounds;
+    }
+
+    private static NativeRect CalculatePosition(NativePoint p, NativeRect workArea,
+        uint dpiX, uint dpiY, bool showAtMouse)
+    {
         int width = (int)Math.Round(DesignSize * dpiX / 96);
         int height = (int)Math.Round(DesignSize * dpiY / 96);
-        int x = showAtMouse ? p.X - width / 2 : (info.WorkArea.Left + info.WorkArea.Right - width) / 2;
-        int y = showAtMouse ? p.Y - height / 2 : (info.WorkArea.Top + info.WorkArea.Bottom - height) / 2;
-        x = Math.Clamp(x, info.WorkArea.Left, Math.Max(info.WorkArea.Left, info.WorkArea.Right - width));
-        y = Math.Clamp(y, info.WorkArea.Top, Math.Max(info.WorkArea.Top, info.WorkArea.Bottom - height));
-        var hwnd = new WindowInteropHelper(this).EnsureHandle();
-        if (!SetWindowPos(hwnd, IntPtr.Zero, x, y, width, height, 0x0014))
-            throw new Win32Exception(Marshal.GetLastWin32Error());
+        int x = showAtMouse ? p.X - width / 2 : (workArea.Left + workArea.Right - width) / 2;
+        int y = showAtMouse ? p.Y - height / 2 : (workArea.Top + workArea.Bottom - height) / 2;
+        x = Math.Clamp(x, workArea.Left, Math.Max(workArea.Left, workArea.Right - width));
+        y = Math.Clamp(y, workArea.Top, Math.Max(workArea.Top, workArea.Bottom - height));
         return new NativeRect { Left = x, Top = y, Right = x + width, Bottom = y + height };
     }
 
@@ -868,7 +891,7 @@ public partial class RadialWindow : Window
         await DismissAsync();
         if (_closed) return;
         if (_previousForeground != IntPtr.Zero) SetForegroundWindow(_previousForeground);
-        ActionExecutor.Execute(item);
+        ActionExecutor.Execute(item, _previousForeground);
     }
 
     protected override void OnClosed(EventArgs e)

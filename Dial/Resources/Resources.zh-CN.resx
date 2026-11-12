@@ -18,6 +18,14 @@
   <data name="ShowCenterField" xml:space="preserve"><value>显示圆心按钮</value></data>
   <data name="InvalidConfiguration" xml:space="preserve"><value>配置必须包含一个 JSON 对象。</value></data>
   <data name="AppName" xml:space="preserve"><value>dial</value></data>
+  <data name="About" xml:space="preserve"><value>关于</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>关于 dial</value></data>
+  <data name="AboutDescription" xml:space="preserve"><value>适用于 Windows 的轮盘启动器。</value></data>
+  <data name="AboutAuthor" xml:space="preserve"><value>作者：abarlett368</value></data>
+  <data name="AboutLicense" xml:space="preserve"><value>Copyright 2026 abarlett368. 保留所有权利。</value></data>
+  <data name="ProjectOnGitHub" xml:space="preserve"><value>GitHub 项目主页</value></data>
+  <data name="ProjectLinkError" xml:space="preserve"><value>无法打开项目主页，请重试。</value></data>
+  <data name="Close" xml:space="preserve"><value>关闭</value></data>
   <data name="WindowTitle" xml:space="preserve"><value>dial 设置</value></data>
   <data name="General" xml:space="preserve"><value>常规</value></data>
   <data name="Add" xml:space="preserve"><value>+ 添加</value></data>
@@ -108,6 +116,7 @@
   <data name="HotkeyError" xml:space="preserve"><value>无法注册键盘快捷键。其他应用可能正在使用此快捷键。</value></data>
   <data name="DisplayError" xml:space="preserve"><value>无法显示轮盘。</value></data>
   <data name="ActionError" xml:space="preserve"><value>无法完成此操作。</value></data>
+  <data name="PasteTargetError" xml:space="preserve"><value>目标窗口已不在前台，已取消粘贴。请激活目标窗口后重试。</value></data>
   <data name="UnexpectedError" xml:space="preserve"><value>dial 遇到意外错误，需要关闭。</value></data>
   <data name="MoveUp" xml:space="preserve"><value>上移</value></data>
   <data name="MoveDown" xml:space="preserve"><value>下移</value></data>
@@ -132,6 +141,9 @@
   <data name="InvalidUrl" xml:space="preserve"><value>请输入完整网址，例如 https://example.com。</value></data>
   <data name="InvalidAppTarget" xml:space="preserve"><value>应用标识符无效。请重新选择已安装的应用。</value></data>
   <data name="RollbackError" xml:space="preserve"><value>无法恢复原来的快捷键或登录启动设置。请检查这些设置后重试。</value></data>
+  <data name="StartupDisabledByUserError" xml:space="preserve"><value>Windows 已禁用 dial 的登录启动。请在“设置 &gt; 应用 &gt; 启动”中启用后重试。</value></data>
+  <data name="StartupPolicyError" xml:space="preserve"><value>Windows 策略不允许更改此登录启动设置。</value></data>
+  <data name="StartupChangeError" xml:space="preserve"><value>Windows 未应用登录启动设置。请检查“设置 &gt; 应用 &gt; 启动”后重试。</value></data>
   <data name="AppArgumentsNotSupported" xml:space="preserve"><value>此应用快捷方式不支持参数。如需使用参数，请选择应用的可执行文件。</value></data>
   <data name="Items" xml:space="preserve"><value>项目</value></data>
   <data name="DialMenu" xml:space="preserve"><value>dial 菜单</value></data>

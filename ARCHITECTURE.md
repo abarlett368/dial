@@ -4,8 +4,9 @@
 
 dial is a WPF desktop application for Windows 10, version 1809 or later, and
 Windows 11. It targets .NET 10 and ships as a self-contained Windows x64
-executable. WPF trimming is disabled. The application does not require an
-installer, background service, WebView, or third-party UI framework.
+executable for portable distribution, with a separate MSIX packaging path.
+WPF trimming is disabled. Neither version requires a background service,
+WebView, or third-party UI framework.
 
 ## Application lifetime
 
@@ -17,6 +18,11 @@ The owner loads settings, applies the saved language and theme, then creates one
 radial window, hotkey handler, and notification-area icon. Closing Settings
 does not exit the process. The notification-area Exit command performs normal
 cleanup.
+
+Taskbar recreation notifications can also arrive during DPI changes while the
+notification icon still exists. Recovery updates the existing icon first, then
+adds it only if needed. A failed recovery is traced rather than terminating the
+application.
 
 [`HotkeyService`](Dial/Services/HotkeyService.cs) uses `RegisterHotKey` and
 `MOD_NOREPEAT`; it does not poll the keyboard. A replacement shortcut is
@@ -32,7 +38,14 @@ same-directory temporary file, and replaces the previous file. Invalid input
 and malformed JSON are reported; existing data is not silently overwritten.
 
 Settings edits are drafts. Save validates and persists the draft before
-applying it. The optional startup entry contains the current executable path.
+applying it. Portable startup registration contains the current executable path.
+When running with package identity, `StartupService` instead uses the manifest's
+`DialStartup` task. Settings reads its Windows-managed state when opened;
+user-disabled or policy-controlled changes produce localized feedback.
+Saving awaits startup changes without blocking the dispatcher. The editor and
+close action are held until the save finishes, and save/reload commits are serialized.
+Failed commits restore the previous hotkey and the actual startup state captured
+before the attempt, rather than assuming the saved preference still matches Windows.
 Tests use `--config <path>` to isolate configuration from the user's profile.
 Validation failures stay in the editor as localized inline feedback; they do not
 reach the application's fatal unhandled-exception handler. Load and reload also
@@ -45,9 +58,21 @@ Status text is right-aligned 16 DIPs before Save, vertically centered and
 single-line with ellipsis and a full-text tooltip, keeping header/body geometry
 stable for long messages. `ErrorService.GetMessage` maps exception types and
 Win32/HRESULT error codes to localized reasons for inline and dialog errors.
-Unknown failures retain their localized operation message; raw exception details
-are logged rather than appended to the interface. Draft validation retains its
+Unknown failures retain their localized operation message rather than appending
+raw exception text. Draft validation retains its
 specific localized field messages.
+
+The About button opens an owned modal [`AboutWindow`](Dial/AboutWindow.xaml).
+It shares the Settings version text and live language/theme resources without
+saving or replacing the draft. The dialog removes its title-bar appearance
+subscription when closed; the project link opens externally only on activation.
+
+Inline persistence failures and reported exceptions write UTC timestamps,
+operation identifiers, exception types, HRESULT/Win32 codes, and bounded stacks to
+`%LOCALAPPDATA%\dial\logs\errors.log`. A 1 MiB limit rotates to one `.previous`
+file; concurrent records are serialized and flushed. Exception messages,
+configuration values, clipboard text, and launch arguments are not persisted.
+Expected log I/O failures are traced without preventing the original error UI.
 
 The configuration contains the hotkey, theme, language, accent, item layout,
 center visibility, startup choice, and up to 16 actions. The first-run defaults
@@ -88,6 +113,16 @@ mode. This avoids a WPF fill expanding before the native blur catches up.
 Clear gaps remain transparent.
 When the material is unavailable or disabled, opaque fills
 use the same geometry.
+
+DPI changes queue one appearance refresh after WPF processes the window change.
+The refresh rebuilds native material masks and text layout at the current DPI,
+preserves selection, and updates the input region. Hidden windows pick up the
+current DPI the next time they are shown.
+
+When native composition becomes unavailable or transparency/energy preferences
+require opaque fallback, the material host is hidden before the fallback is
+presented. Composition failures release their native resources and retain opaque
+fallback for that backdrop instance; a new instance can initialize composition again.
 
 Sector material contours are flattened once with 0.05-pixel tolerance and reused.
 The material clip is inset half a physical pixel from the resting painted
@@ -233,6 +268,11 @@ applications and activates supported packaged apps. [`TrayIconService`](Dial/Ser
 uses `Shell_NotifyIcon` and restores its icon after Explorer restarts.
 [`StartupService`](Dial/Services/StartupService.cs) manages the current user's
 Run registry entry.
+
+Clipboard snippets retain the previously active target window. A missing or
+changed foreground target cancels the paste with a localized explanation before
+writing the clipboard, on each retry, and immediately before sending Ctrl+V.
+Windows input delivery and foreground changes are not an atomic operation.
 
 ## Source and validation
 

@@ -93,7 +93,10 @@ public sealed class NativeBackdrop : IDisposable
         {
             if (!_allowBackdrop || _unavailable || SystemParameters.HighContrast || !TransparencyEnabled() ||
                 Windows.System.Power.PowerManager.EnergySaverStatus == Windows.System.Power.EnergySaverStatus.On)
+            {
+                Hide();
                 return;
+            }
             EnsureComposition();
             var dpi = VisualTreeHelper.GetDpi(_window);
             var dpiScale = new Vector2((float)dpi.DpiScaleX, (float)dpi.DpiScaleY);
@@ -165,6 +168,7 @@ public sealed class NativeBackdrop : IDisposable
             Trace.TraceWarning("Masked system composition is unavailable; using opaque surfaces: {0}", exception);
             if (_visual is not null) _visual.Opacity = 0;
             _unavailable = true;
+            Hide();
             ReleaseComposition();
         }
     }

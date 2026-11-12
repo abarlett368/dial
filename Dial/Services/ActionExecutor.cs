@@ -13,7 +13,7 @@ public static class ActionExecutor
             ? InstalledAppService.SupportsElevation(target)
             : !Uri.TryCreate(Environment.ExpandEnvironmentVariables(target), UriKind.Absolute, out var uri) || uri.IsFile);
 
-    public static async void Execute(MenuItemModel item)
+    public static async void Execute(MenuItemModel item, IntPtr targetWindow)
     {
         try
         {
@@ -33,10 +33,13 @@ public static class ActionExecutor
                     RunScript(item.Target);
                     break;
                 case MenuItemType.ClipboardSnippet:
-                    await SetClipboardAsync(item.Target);
-                    SendChord(0x11, 0x56);
+                    await PasteAsync(item.Target, targetWindow);
                     break;
             }
+        }
+        catch (OperationCanceledException exception) when (item.Type == MenuItemType.ClipboardSnippet)
+        {
+            ErrorService.Report("PasteTargetError", exception);
         }
         catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
         {
@@ -88,20 +91,29 @@ public static class ActionExecutor
         });
     }
 
-    private static async Task SetClipboardAsync(string text)
+    private static async Task PasteAsync(string text, IntPtr targetWindow)
     {
         for (int i = 0; i < 5; i++)
         {
+            EnsurePasteTarget(targetWindow);
             try
             {
                 Clipboard.SetText(text);
-                return;
+                break;
             }
             catch (COMException) when (i < 4)
             {
                 await Task.Delay(40);
             }
         }
+        EnsurePasteTarget(targetWindow);
+        SendChord(0x11, 0x56);
+    }
+
+    private static void EnsurePasteTarget(IntPtr targetWindow)
+    {
+        if (targetWindow == IntPtr.Zero || GetForegroundWindow() != targetWindow)
+            throw new OperationCanceledException(LocalizationService.T("PasteTargetError"));
     }
 
     private static void RunSystemCommand(SystemCommand cmd)
@@ -229,6 +241,9 @@ public static class ActionExecutor
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, NativeInput[] input, int size);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
     private static extern bool LockWorkStation();

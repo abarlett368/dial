@@ -81,8 +81,11 @@ public sealed class TrayIconService : IDisposable
     {
         if ((uint)msg == _taskbarCreated)
         {
-            AddOrModify(NimAdd);
-            _added = true;
+            var data = CreateData();
+            // DPI changes can announce TaskbarCreated without removing the existing icon.
+            _added = Shell_NotifyIcon(NimModify, ref data) || Shell_NotifyIcon(NimAdd, ref data);
+            if (!_added)
+                Trace.TraceWarning("The notification icon could not be restored: {0}.", Marshal.GetLastWin32Error());
         }
         else if (msg == WmTrayCallback)
         {

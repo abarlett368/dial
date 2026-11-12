@@ -19,6 +19,14 @@
   <data name="InvalidConfiguration" xml:space="preserve"><value>The configuration must contain a JSON object.</value></data>
   <data name="AppName" xml:space="preserve"><value>dial</value></data>
   <data name="WindowTitle" xml:space="preserve"><value>dial settings</value></data>
+  <data name="About" xml:space="preserve"><value>About</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>About dial</value></data>
+  <data name="AboutDescription" xml:space="preserve"><value>A radial app launcher for Windows.</value></data>
+  <data name="AboutAuthor" xml:space="preserve"><value>Created by abarlett368</value></data>
+  <data name="AboutLicense" xml:space="preserve"><value>Copyright 2026 abarlett368. All rights reserved.</value></data>
+  <data name="ProjectOnGitHub" xml:space="preserve"><value>Project on GitHub</value></data>
+  <data name="ProjectLinkError" xml:space="preserve"><value>Couldn't open the project page. Try again.</value></data>
+  <data name="Close" xml:space="preserve"><value>Close</value></data>
   <data name="General" xml:space="preserve"><value>General</value></data>
   <data name="Add" xml:space="preserve"><value>+ Add</value></data>
   <data name="Remove" xml:space="preserve"><value>Remove</value></data>
@@ -108,6 +116,7 @@
   <data name="HotkeyError" xml:space="preserve"><value>Couldn't register the keyboard shortcut. It may be used by another app.</value></data>
   <data name="DisplayError" xml:space="preserve"><value>Couldn't display the dial.</value></data>
   <data name="ActionError" xml:space="preserve"><value>Couldn't complete this action.</value></data>
+  <data name="PasteTargetError" xml:space="preserve"><value>Paste was cancelled because the target window is no longer active. Activate it and try again.</value></data>
   <data name="UnexpectedError" xml:space="preserve"><value>dial encountered an unexpected error and needs to close.</value></data>
   <data name="MoveUp" xml:space="preserve"><value>Move up</value></data>
   <data name="MoveDown" xml:space="preserve"><value>Move down</value></data>
@@ -132,6 +141,9 @@
   <data name="InvalidUrl" xml:space="preserve"><value>Enter a complete URL, such as https://example.com.</value></data>
   <data name="InvalidAppTarget" xml:space="preserve"><value>Select an installed app again. Its app identifier isn't valid.</value></data>
   <data name="RollbackError" xml:space="preserve"><value>Couldn't restore the previous shortcut or startup setting. Check these settings before trying again.</value></data>
+  <data name="StartupDisabledByUserError" xml:space="preserve"><value>Windows has disabled startup for dial. Enable it in Settings &gt; Apps &gt; Startup, then try again.</value></data>
+  <data name="StartupPolicyError" xml:space="preserve"><value>Your Windows policy does not allow this startup change.</value></data>
+  <data name="StartupChangeError" xml:space="preserve"><value>Windows did not apply the startup setting. Check Settings &gt; Apps &gt; Startup and try again.</value></data>
   <data name="AppArgumentsNotSupported" xml:space="preserve"><value>This app shortcut doesn't support arguments. To use arguments, select the app's executable file instead.</value></data>
   <data name="Items" xml:space="preserve"><value>Items</value></data>
   <data name="DialMenu" xml:space="preserve"><value>dial menu</value></data>

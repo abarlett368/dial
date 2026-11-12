@@ -4,8 +4,7 @@
 select an action with your mouse or keyboard.
 
 [Download the latest release](https://github.com/abarlett368/dial/releases/latest) ·
-[简体中文](README.zh-CN.md) ·
-[User guide](docs/USER-GUIDE.md) ·
+[User guide](#user-guide) ·
 [Architecture](ARCHITECTURE.md) ·
 [Release notes](CHANGELOG.md)
 
@@ -19,29 +18,196 @@ select an action with your mouse or keyboard.
 
 The app requires 64-bit Windows 10, version 1809 or later, or Windows 11.
 
-## Use the dial
+## User guide
 
-- Point to a sector and click to run its action.
-- Use the arrow keys to change the selection; press **Enter** to run it.
-- Press **Esc**, click the center, or click outside the dial to dismiss it.
-- Move the pointer outside the dial to reset the selection.
-- To change the shortcut or actions, open Settings from the notification area.
-  Closing Settings leaves dial running. Use its notification-area menu to exit.
+### First launch and updates
 
-The dial supports up to 16 actions. Configure an action to open an app, file,
-folder, or URL; run a Windows command or script; or paste saved text. You can
-also choose a theme and an icon-and-label layout. Supported executable actions
-and installed apps such as Windows Terminal can request administrator access
-through Windows User Account Control (UAC).
+Open Settings from the notification-area menu to change the shortcut or actions.
+Closing Settings leaves dial running; use the notification-area Exit command
+to quit. Choose About above the up/down arrows in Settings to view the version,
+author, project page, and copyright notice. This does not save or change settings.
+The project link opens in the default browser only when clicked.
 
-Settings are stored per user in
-`%LOCALAPPDATA%\dial\settings.json`. They remain in place when you replace the
-executable with an update. Acrylic effects depend on Windows transparency
-settings and graphics support; when Acrylic is unavailable, the dial uses opaque
-sectors with transparent gaps.
+For a portable copy, run `dial.exe` from a permanent folder. Settings opens
+automatically if no configuration exists. Choose Save to persist it. Before
+replacing the executable with an update, exit dial from its notification-area
+menu. Replacing the executable preserves per-user settings.
 
-The light theme uses the correct Windows Blue color #357EC7 as its accent color.
-The dark theme uses the brighter blue #4CC2FF as its accent color.
+If launch at sign-in is enabled and you move the portable executable, disable
+that setting, save, move the program, then enable it and save again from the new
+location.
+
+For an MSIX installation, Windows manages installation, updates, and startup.
+The startup option follows Windows' current setting. If Windows has disabled it,
+enable it under Settings > Apps > Startup; dial cannot override a user or policy
+block. While a save is pending, editing and closing Settings are temporarily
+disabled. Portable copies continue to use their existing startup registration.
+
+### Open, select, and dismiss
+
+The default shortcut is Ctrl+Tab. In Settings, choose Set next to the shortcut
+field, press the desired combination, then Save. Cancel or Esc abandons recording.
+The shortcut is temporarily unregistered during recording. Another application's
+shortcut registration may conflict; dial reports the conflict.
+
+The dial normally opens in the work area of the monitor under the pointer.
+Enable mouse placement to open near the pointer, constrained to that work area.
+
+- Click a sector to execute its action.
+- Right/Up selects the next item clockwise; Left/Down selects the previous item.
+  Enter executes the selection.
+- Moving the pointer out of the dial resets selection.
+- Esc, the center, an outside click, or losing focus dismisses the dial.
+  Hiding the center does not disable dismissal at its position.
+
+An empty list, or a list without enabled items, does not open a dial.
+
+### Configure items
+
+Select an item to edit it. Add, Remove, and the arrow buttons change the list.
+The ring starts at 12 o'clock and follows list order clockwise. Up to 16 items
+are supported. Disabled items remain saved but are omitted from the dial.
+Unsaved edits do not change the active configuration. Save previews the chosen
+accent color; list selection stays neutral gray and does not change row size.
+
+| Action | Use |
+| --- | --- |
+| Launch app | Select an executable or an installed app; optional arguments |
+| Open file/folder | Select a document or folder to open using Windows |
+| Open URL | Enter an absolute URL or supported application URI |
+| System command | Choose a built-in Windows action |
+| Run command/script | Configure a command you trust |
+| Paste text | Replace the clipboard with a snippet and send Ctrl+V |
+
+The installed-app picker includes supported Microsoft Store apps. **Windows
+Terminal** and other installed apps whose Windows menu offers **Run as
+administrator** can also use this option in a portable copy of dial: choose the
+app with **Apps...**, check **Run as administrator**, then Save. dial uses the
+app's native Windows administrator command and preserves optional arguments.
+Windows requests UAC consent; dial itself remains unelevated. Cancelling UAC
+cancels only that launch. Administrator launches inside an installed MSIX have
+not yet been verified.
+
+The option is disabled for app targets that do not expose an administrator
+command and for URI shortcuts, not for all Store apps. You can also use Browse
+to select a desktop executable. Changing to an unsupported target clears the
+elevation selection and displays an explanation.
+
+Success and error messages share the header area beside Save, not the bottom of
+Settings. Invalid drafts do not close dial or change the saved configuration.
+Errors stay visible until editing or a new result; success disappears after
+three seconds. Correct the indicated field and Save again.
+Feedback is right-aligned beside Save on the same vertical centerline, separate
+from About. Long messages are ellipsized without moving the controls; hover to
+read the full text. File locks, permissions, missing files, and disk-space errors
+use the selected interface language, not the operating system's raw exception text.
+
+Names and custom text icons support up to 64 characters. Icons may also use image
+files. Keep external targets and icon files available at their configured paths.
+Only configure scripts and command targets you understand and trust.
+System power/session commands can interrupt work; do not use them as test items.
+
+The Paste email example contains `you@example.com`; replace it before use.
+Paste text overwrites the clipboard. Windows can block injected input into a
+higher-privilege application. If the target window is no longer active, dial
+cancels the paste instead of sending Ctrl+V to a different window. Activate the
+target and try again.
+
+### Appearance
+
+Choose a light or dark theme, an accent color, and either English or Simplified
+Chinese as the interface language. Layouts are:
+outer icons/inner labels (default), inner icons/outer labels, labels only, or
+icons only. The optional center adapts to selected names within a bounded size.
+Its outline matches the resting sectors and follows the disk during resizing.
+Extremely long words may still be ellipsized to preserve the sector boundary.
+The default accents are Windows Blue #357EC7 in light mode and #4CC2FF in dark mode.
+
+Selection keeps the theme's text color unchanged. Accent variants are tuned for
+dark text in the light theme and white text in the dark theme. Light-theme
+Windows Blue deliberately retains #357EC7 even though its text contrast is lower.
+Acrylic selection uses a stronger color tint with equivalent background
+transmission; the background can still affect its displayed color. High Contrast
+uses the system's highlight text color.
+
+The second color option, **Windows accent**, follows the Windows accent color
+and updates automatically when that color changes, including while the dial is
+open. Its tint is lightened or darkened when necessary to keep the theme's text
+color unchanged and readable.
+
+System transparency, high contrast, and animation preferences affect rendering.
+When Acrylic is unavailable, the dial uses opaque sectors with transparent gaps.
+Settings, About, and the installed-app picker use square controls and window
+corners. Native title bars follow Windows' default app mode, independently of
+dial's content theme. Changing Windows appearance refreshes their title bars
+without restarting dial. Hover and pressed states use subtle fills without heavy
+black frames; keyboard focus is indicated by an underline.
+
+### Windows publisher and security warnings
+
+The current portable executable is not Authenticode-signed. An **Unknown
+publisher** warning means Windows cannot verify its publisher; changing the
+interface or requesting administrator rights does not establish that identity.
+
+To establish a publicly trusted portable publisher identity, use a trusted
+code-signing certificate or an eligible public-trust signing service, plus
+timestamping of the final executable. Individual developers can obtain code
+signing, subject to the provider's identity and regional eligibility checks.
+A self-signed certificate does not establish public trust on other computers.
+Microsoft signs packages distributed through the Store's MSIX route; that does
+not also sign a separately downloaded portable executable.
+
+A valid signature identifies the publisher; it does not bypass normal UAC
+consent or guarantee that SmartScreen will never warn about a new download.
+SmartScreen reputation and antivirus detections are separate from publisher
+identity. Do not disable Windows protections to suppress these warnings.
+
+### Settings, backup, and reset
+
+The normal file is `%LOCALAPPDATA%\dial\settings.json`. Open that location using
+the File Explorer address bar. It is per-user and is not synchronized or stored
+inside the executable. The settings file is not created until Save. An error
+can create the separate diagnostic-log directory before the first save.
+
+- **Backup:** exit dial and copy the settings file to a safe location.
+- **Restore:** exit dial, replace the file with a compatible backup, then restart.
+- **Reset:** exit dial and rename the settings file to a backup name. Start dial
+  to load the eight defaults; Save creates a new file.
+- **Reload:** the notification-area Reload command reads the saved file, not
+  unsaved Settings edits.
+
+A saved empty item list stays empty. Malformed settings produce an error and are
+not silently overwritten; restore a backup or rename the file to reset.
+The file can contain private snippets, command arguments, and local paths.
+Do not upload it to the source repository.
+Windows may virtualize MSIX application data; do not assume installed and portable
+copies share settings. Back up settings before uninstalling.
+
+### Troubleshooting and removal
+
+| Symptom | Check |
+| --- | --- |
+| Shortcut does not open the dial | Resolve the reported shortcut conflict; check enabled items |
+| Closing Settings leaves a process | Expected: use the notification-area Exit command |
+| No Acrylic | Check Windows transparency/high contrast, remote-session and graphics limitations |
+| An action fails | Check its target, permissions, arguments, and installed application |
+| Text moves with slight softness | Fractional scaling uses grayscale antialiasing; entry/exit no longer resample a whole-canvas bitmap |
+| Settings cannot load/save | Check file format, permissions, and whether the file is locked |
+
+Errors are recorded in `%LOCALAPPDATA%\dial\logs\errors.log`, with one
+`errors.log.previous` backup. Each file is limited to 1 MiB. The records contain
+error codes, exception types, and bounded stacks, not exception messages,
+configuration contents, clipboard text, or launch arguments. Review any local
+paths in a log before sharing it.
+
+For diagnostics, `dial.exe --settings` opens Settings. An explicit
+`dial.exe --config "C:\path\settings.json"` uses another profile; exit the existing
+instance first because only one instance runs per Windows session.
+
+To remove a portable copy, disable launch at sign-in and Save, exit, then delete
+the executable. Optionally delete `%LOCALAPPDATA%\dial` after backing up settings.
+There is no installed service or portable installer to remove.
+For an MSIX installation, uninstall through Windows Settings > Apps instead.
 
 ## Build
 
@@ -60,11 +226,12 @@ settings are not part of the repository.
 
 ## Project documentation
 
-- [User guide](docs/USER-GUIDE.md)
+- [User guide](#user-guide)
 - [Architecture](ARCHITECTURE.md)
 - [Release notes](CHANGELOG.md)
 
 ## Copyright
 
-Copyright 2026 abarlett368. All rights reserved. No license is granted to use,
-modify, or distribute this software.
+Copyright 2026 abarlett368. All rights reserved.
+
+Third-party components retain their respective licenses.

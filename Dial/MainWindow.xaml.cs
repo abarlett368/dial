@@ -51,6 +51,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<MenuItemModel> _items;
     private bool _loading;
     private bool _recordingHotkey;
+    private bool _saving;
     private string _previousHotkey = "";
     public event Action<bool>? ShortcutRecordingChanged;
 
@@ -61,7 +62,7 @@ public partial class MainWindow : Window
     private HoverColorItem[] _hoverColorItems = Array.Empty<HoverColorItem>();
     private IconModeItem[] _iconModeItems = Array.Empty<IconModeItem>();
 
-    public Action<MenuConfig>? SaveRequested { get; init; }
+    public Func<MenuConfig, Task>? SaveRequested { get; init; }
 
     public MainWindow(MenuConfig config)
     {
@@ -120,6 +121,7 @@ public partial class MainWindow : Window
             _statusTimer?.Stop();
             ThemeService.WindowAppearanceChanged -= ApplyTitleBarTheme;
         };
+        Closing += (_, e) => { if (_saving) e.Cancel = true; };
         SourceInitialized += (_, _) => ApplyTitleBarTheme();
         ThemeService.WindowAppearanceChanged += ApplyTitleBarTheme;
     }
@@ -134,8 +136,13 @@ public partial class MainWindow : Window
 
     private void ShowVersion()
     {
-        var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = $"v{version?.Major ?? 1}.{version?.Minor ?? 0}.{version?.Build ?? 0}";
+        VersionText.Text = App.DisplayVersion;
+    }
+
+    private void AboutButton_Click(object sender, RoutedEventArgs e)
+    {
+        EndShortcutRecording(true);
+        new AboutWindow { Owner = this }.ShowDialog();
     }
 
     private MenuItemModel? Selected => ItemList.SelectedItem as MenuItemModel;
@@ -460,7 +467,7 @@ public partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is COMException or Win32Exception)
         {
-            Trace.TraceError("InstalledAppsError: {0}", exception);
+            ErrorService.LogError("InstalledAppsError", exception);
             ShowStatus(ErrorService.GetMessage("InstalledAppsError", exception), true);
         }
     }
@@ -523,8 +530,9 @@ public partial class MainWindow : Window
         ShortcutRecordingChanged?.Invoke(false);
     }
 
-    private void SaveButton_Click(object sender, RoutedEventArgs e)
+    private async void SaveButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_saving) return;
         EndShortcutRecording(true);
         _config.Hotkey = HotkeyBox.Text.Trim();
         _config.Theme = (ThemeBox.SelectedItem as ThemeItem)?.Code ?? "Light";
@@ -551,13 +559,23 @@ public partial class MainWindow : Window
         {
             if (SaveRequested is null)
                 throw new InvalidOperationException("No configuration save handler is registered.");
-            SaveRequested(ConfigService.Clone(_config));
+            _saving = true;
+            BodyGrid.IsEnabled = false;
+            HeaderRow.IsEnabled = false;
+            await SaveRequested(ConfigService.Clone(_config));
             ShowTransientStatus(LocalizationService.T("SavedStatus"));
         }
-        catch (Exception exception) when (exception is InvalidDataException or IOException or UnauthorizedAccessException or Win32Exception or System.Security.SecurityException)
+        catch (Exception exception) when (exception is InvalidDataException or IOException or UnauthorizedAccessException
+            or Win32Exception or COMException or System.Security.SecurityException)
         {
-            Trace.TraceError("ConfigSaveError: {0}", exception);
+            ErrorService.LogError("ConfigSaveError", exception);
             ShowStatus(ErrorService.GetMessage("ConfigSaveError", exception), true);
+        }
+        finally
+        {
+            _saving = false;
+            BodyGrid.IsEnabled = true;
+            HeaderRow.IsEnabled = true;
         }
     }
 
