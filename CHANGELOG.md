@@ -4,8 +4,8 @@
 
 - Run commands through Command Prompt, PowerShell, or a custom interpreter, with
   configurable argument templates.
-- Add a visual Windows symbol gallery and selection of image, ICO, EXE, DLL, and
-  ICL icon resources.
+- Add a visual Windows symbol gallery, support for image and ICO files, and
+  icon resources from EXE, DLL, and ICL files.
 - Add play/pause, previous track, next track, and stop Windows media operations.
 - Add a Send shortcut action for one key or one key combination.
 - Load the icon gallery in the background, virtualize its list, and keep

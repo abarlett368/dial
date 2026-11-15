@@ -15,7 +15,7 @@ Store. Store updates are delivered through the Store.
 ## What's new in 1.4.11
 
 - Run commands through Command Prompt, PowerShell, or a custom interpreter.
-- Select icons from Windows symbols or image, ICO, EXE, DLL, and ICL resources.
+- Choose icons from Windows symbols, image and ICO files, or EXE, DLL, and ICL resources.
 - Control media playback and send a single key or key combination.
 - Navigate the wheel with a keyboard or screen reader, including icons-only mode.
 - Keep Settings at a consistent size, with scrolling on smaller displays.
@@ -32,12 +32,14 @@ See the [1.4.11 release notes](CHANGELOG.md#1411).
 - Use Windows actions for media, volume, screen capture, and session controls.
 - Configure up to 16 menu items and arrange or disable them individually.
 - Choose a light or dark theme, accent color, and icon-and-label layout.
-- Select icons from Windows symbols and common image or executable resources.
+- Choose icons from Windows symbols, image and ICO files, or EXE, DLL, and ICL resources.
 - Use the interface in English or Simplified Chinese.
 
 ## Requirements
 
 Requires 64-bit Windows 10, version 1809 or later, or Windows 11.
+
+## Installation
 
 ### Microsoft Store
 
