@@ -10,6 +10,9 @@ public class MenuItemModel
     public MenuItemType Type { get; set; } = MenuItemType.LaunchApp;
     public string Target { get; set; } = "";
     public string Arguments { get; set; } = "";
+    public ScriptInterpreter Interpreter { get; set; } = ScriptInterpreter.CommandPrompt;
+    public string InterpreterPath { get; set; } = "";
+    public string InterpreterArguments { get; set; } = "";
     public bool RunAsAdministrator { get; set; }
     public SystemCommand Command { get; set; } = SystemCommand.Lock;
     public string Icon { get; set; } = "";

@@ -82,7 +82,9 @@ public sealed class ConfigService
         {
             if (item is null || item.Label is null || item.Label.Length > DialGeometry.MaximumTextLength ||
                 item.Icon is null || item.Target is null || item.Arguments is null ||
-                item.IconIndex is < -1 || !Enum.IsDefined(item.Type) || !Enum.IsDefined(item.Command))
+                item.InterpreterPath is null || item.InterpreterArguments is null ||
+                item.IconIndex is < -1 || !Enum.IsDefined(item.Type) || !Enum.IsDefined(item.Command) ||
+                !Enum.IsDefined(item.Interpreter))
                 throw new InvalidDataException(LocalizationService.T("InvalidItem"));
             bool resourceIcon = item.IconIndex is int index && index >= 0;
             if (!resourceIcon && item.Icon.Length > DialGeometry.MaximumTextLength &&
@@ -105,6 +107,9 @@ public sealed class ConfigService
             if (item.Type != MenuItemType.SystemCommand && string.IsNullOrWhiteSpace(item.Target))
                 throw new InvalidDataException(string.Format(LocalizationService.CurrentCulture,
                     LocalizationService.T("TargetRequired"), item.Label));
+            if (item.Type == MenuItemType.RunScript && item.Interpreter == ScriptInterpreter.Custom &&
+                string.IsNullOrWhiteSpace(item.InterpreterPath))
+                throw new InvalidDataException(LocalizationService.T("ScriptInterpreterRequired"));
             if (item.Type == MenuItemType.SendShortcut)
             {
                 if (!HotkeyService.TryParseShortcut(item.Target, out uint mods, out uint key))

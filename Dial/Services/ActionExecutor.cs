@@ -30,7 +30,7 @@ public static class ActionExecutor
                     await RunSystemCommandAsync(item.Command, targetWindow);
                     break;
                 case MenuItemType.RunScript:
-                    RunScript(item.Target);
+                    Process.Start(CreateScriptStartInfo(item));
                     break;
                 case MenuItemType.ClipboardSnippet:
                     await PasteAsync(item.Target, targetWindow);
@@ -103,15 +103,44 @@ public static class ActionExecutor
         Process.Start(new ProcessStartInfo { FileName = Environment.ExpandEnvironmentVariables(target), UseShellExecute = true });
     }
 
-    private static void RunScript(string command)
+    internal static ProcessStartInfo CreateScriptStartInfo(MenuItemModel item)
     {
-        Process.Start(new ProcessStartInfo
+        if (item.Type != MenuItemType.RunScript)
+            throw new ArgumentException(nameof(item));
+
+        var startInfo = new ProcessStartInfo
         {
-            FileName = "cmd.exe",
-            Arguments = "/c " + command,
             UseShellExecute = false,
             CreateNoWindow = true,
-        });
+        };
+        switch (item.Interpreter)
+        {
+            case ScriptInterpreter.CommandPrompt:
+                startInfo.FileName = "cmd.exe";
+                startInfo.Arguments = "/c " + item.Target;
+                break;
+            case ScriptInterpreter.PowerShell:
+                startInfo.FileName = "powershell.exe";
+                startInfo.ArgumentList.Add("-NoLogo");
+                startInfo.ArgumentList.Add("-NoProfile");
+                startInfo.ArgumentList.Add("-NonInteractive");
+                startInfo.ArgumentList.Add("-Command");
+                startInfo.ArgumentList.Add(item.Target);
+                break;
+            case ScriptInterpreter.Custom:
+                if (string.IsNullOrWhiteSpace(item.InterpreterPath))
+                    throw new ArgumentException(LocalizationService.T("ScriptInterpreterRequired"), nameof(item));
+                startInfo.FileName = Environment.ExpandEnvironmentVariables(item.InterpreterPath);
+                startInfo.Arguments = item.InterpreterArguments.Contains("{command}", StringComparison.Ordinal)
+                    ? item.InterpreterArguments.Replace("{command}", item.Target, StringComparison.Ordinal)
+                    : string.IsNullOrWhiteSpace(item.InterpreterArguments)
+                        ? item.Target
+                        : $"{item.InterpreterArguments.TrimEnd()} {item.Target}";
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(item));
+        }
+        return startInfo;
     }
 
     private static async Task PasteAsync(string text, IntPtr targetWindow)

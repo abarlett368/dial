@@ -28,6 +28,11 @@ public partial class MainWindow : Window
         public string Name => LocalizationService.T(LocKey);
     }
 
+    private sealed record ScriptInterpreterItem(ScriptInterpreter Interpreter, string LocKey)
+    {
+        public string Name => LocalizationService.T(LocKey);
+    }
+
     private sealed record ThemeItem(string Code, string LocKey)
     {
         public string Name => LocalizationService.T(LocKey);
@@ -61,6 +66,7 @@ public partial class MainWindow : Window
 
     private TypeItem[] _typeItems = Array.Empty<TypeItem>();
     private CommandItem[] _commandItems = Array.Empty<CommandItem>();
+    private ScriptInterpreterItem[] _scriptInterpreterItems = Array.Empty<ScriptInterpreterItem>();
     private ThemeItem[] _themeItems = Array.Empty<ThemeItem>();
     private LanguageItem[] _languageItems = Array.Empty<LanguageItem>();
     private HoverColorItem[] _hoverColorItems = Array.Empty<HoverColorItem>();
@@ -250,6 +256,13 @@ public partial class MainWindow : Window
             new TypeItem(MenuItemType.SendShortcut, "TypeSendShortcut"),
         };
 
+        _scriptInterpreterItems = new[]
+        {
+            new ScriptInterpreterItem(ScriptInterpreter.CommandPrompt, "ScriptInterpreterCmd"),
+            new ScriptInterpreterItem(ScriptInterpreter.PowerShell, "ScriptInterpreterPowerShell"),
+            new ScriptInterpreterItem(ScriptInterpreter.Custom, "ScriptInterpreterCustom"),
+        };
+
         _commandItems = new[]
         {
             new CommandItem(SystemCommand.Screenshot, "CmdScreenshot"),
@@ -281,10 +294,15 @@ public partial class MainWindow : Window
         CommandBox.ItemsSource = null;
         CommandBox.ItemsSource = _commandItems;
         CommandBox.DisplayMemberPath = nameof(CommandItem.Name);
+        ScriptInterpreterBox.ItemsSource = null;
+        ScriptInterpreterBox.ItemsSource = _scriptInterpreterItems;
+        ScriptInterpreterBox.DisplayMemberPath = nameof(ScriptInterpreterItem.Name);
 
         var selected = Selected;
         TypeBox.SelectedItem = _typeItems.FirstOrDefault(t => t.Type == selected?.Type) ?? _typeItems[0];
         CommandBox.SelectedItem = _commandItems.FirstOrDefault(c => c.Command == selected?.Command) ?? _commandItems[0];
+        ScriptInterpreterBox.SelectedItem = _scriptInterpreterItems.FirstOrDefault(
+            interpreter => interpreter.Interpreter == selected?.Interpreter) ?? _scriptInterpreterItems[0];
         UpdateCommandHint();
 
         ThemeBox.ItemsSource = null;
@@ -384,6 +402,10 @@ public partial class MainWindow : Window
         TypeBox.SelectedItem = _typeItems.FirstOrDefault(t => t.Type == item.Type) ?? _typeItems[0];
         TargetBox.Text = item.Target;
         ArgsBox.Text = item.Arguments;
+        ScriptInterpreterBox.SelectedItem = _scriptInterpreterItems.FirstOrDefault(
+            interpreter => interpreter.Interpreter == item.Interpreter) ?? _scriptInterpreterItems[0];
+        InterpreterPathBox.Text = item.InterpreterPath;
+        InterpreterArgumentsBox.Text = item.InterpreterArguments;
         AdministratorBox.IsChecked = item.RunAsAdministrator;
         CommandBox.SelectedItem = _commandItems.FirstOrDefault(c => c.Command == item.Command) ?? _commandItems[0];
         IconBox.Text = item.Icon;
@@ -398,6 +420,7 @@ public partial class MainWindow : Window
         bool showTarget = type != MenuItemType.SystemCommand;
         bool showArgs = type == MenuItemType.LaunchApp;
         bool showCommand = type == MenuItemType.SystemCommand;
+        bool showInterpreter = type == MenuItemType.RunScript;
         bool showBrowse = type is MenuItemType.LaunchApp or MenuItemType.OpenFile;
 
         TargetLabel.Visibility = showTarget ? Visibility.Visible : Visibility.Collapsed;
@@ -413,7 +436,10 @@ public partial class MainWindow : Window
         UpdateElevationState();
         CmdLabel.Visibility = showCommand ? Visibility.Visible : Visibility.Collapsed;
         CommandBox.Visibility = showCommand ? Visibility.Visible : Visibility.Collapsed;
+        ScriptInterpreterLabel.Visibility = showInterpreter ? Visibility.Visible : Visibility.Collapsed;
+        ScriptInterpreterBox.Visibility = showInterpreter ? Visibility.Visible : Visibility.Collapsed;
         UpdateCommandHint();
+        UpdateInterpreterFields();
 
         TargetLabel.Text = LocalizationService.T(type switch
         {
@@ -518,6 +544,36 @@ public partial class MainWindow : Window
         Selected.Command = c;
         UpdateCommandHint();
         RefreshSelectedIcon();
+    }
+
+    private void ScriptInterpreterBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || Selected is null) return;
+        Selected.Interpreter = (ScriptInterpreterBox.SelectedItem as ScriptInterpreterItem)?.Interpreter
+            ?? ScriptInterpreter.CommandPrompt;
+        UpdateInterpreterFields();
+    }
+
+    private void InterpreterPathBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_loading || Selected is null) return;
+        Selected.InterpreterPath = InterpreterPathBox.Text;
+    }
+
+    private void InterpreterArgumentsBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_loading || Selected is null) return;
+        Selected.InterpreterArguments = InterpreterArgumentsBox.Text;
+    }
+
+    private void UpdateInterpreterFields()
+    {
+        bool showCustom = Selected is { Type: MenuItemType.RunScript, Interpreter: ScriptInterpreter.Custom };
+        InterpreterPathLabel.Visibility = showCustom ? Visibility.Visible : Visibility.Collapsed;
+        InterpreterPathBox.Visibility = showCustom ? Visibility.Visible : Visibility.Collapsed;
+        InterpreterArgumentsLabel.Visibility = showCustom ? Visibility.Visible : Visibility.Collapsed;
+        InterpreterArgumentsBox.Visibility = showCustom ? Visibility.Visible : Visibility.Collapsed;
+        ScriptInterpreterHint.Visibility = showCustom ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void UpdateCommandHint()

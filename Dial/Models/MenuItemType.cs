@@ -35,3 +35,10 @@ public enum SystemCommand
     MediaNext,
     MediaStop
 }
+
+public enum ScriptInterpreter
+{
+    CommandPrompt,
+    PowerShell,
+    Custom
+}

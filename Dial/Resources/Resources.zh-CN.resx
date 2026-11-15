@@ -36,9 +36,17 @@
   <data name="TargetLaunchApp" xml:space="preserve"><value>应用路径、命令或已安装的应用</value></data>
   <data name="TargetOpenFile" xml:space="preserve"><value>文件或文件夹路径</value></data>
   <data name="TargetOpenUrl" xml:space="preserve"><value>网址，例如 https://example.com</value></data>
-  <data name="TargetRunScript" xml:space="preserve"><value>命令或脚本路径</value></data>
+  <data name="TargetRunScript" xml:space="preserve"><value>要执行的命令</value></data>
   <data name="TargetClipboard" xml:space="preserve"><value>要粘贴的文本</value></data>
   <data name="ArgsField" xml:space="preserve"><value>参数（可选）</value></data>
+  <data name="ScriptInterpreterField" xml:space="preserve"><value>命令解释器</value></data>
+  <data name="ScriptInterpreterCmd" xml:space="preserve"><value>命令提示符（cmd.exe）</value></data>
+  <data name="ScriptInterpreterPowerShell" xml:space="preserve"><value>Windows PowerShell</value></data>
+  <data name="ScriptInterpreterCustom" xml:space="preserve"><value>自定义可执行文件</value></data>
+  <data name="ScriptInterpreterPath" xml:space="preserve"><value>解释器可执行文件路径</value></data>
+  <data name="ScriptInterpreterArguments" xml:space="preserve"><value>解释器参数模板（可选）</value></data>
+  <data name="ScriptInterpreterHint" xml:space="preserve"><value>在参数模板中需要插入命令的位置填写 {command}。若参数中没有 {command}，命令会追加到末尾。</value></data>
+  <data name="ScriptInterpreterRequired" xml:space="preserve"><value>请选择自定义解释器的可执行文件。</value></data>
   <data name="CommandField" xml:space="preserve"><value>Windows 操作</value></data>
   <data name="CommandSessionHint" xml:space="preserve"><value>点击此扇区会立即请求执行所选操作，dial 不会再次确认。请先保存工作。</value></data>
   <data name="CommandLockSleepHint" xml:space="preserve"><value>点击此扇区会按所选操作立即锁定电脑或使其睡眠。</value></data>

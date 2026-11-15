@@ -2,32 +2,27 @@
 
 ## 1.4.11
 
-### Added
-
-- A visual Windows symbol gallery and selection of image, ICO, EXE, DLL, and
+- Run commands through Command Prompt, PowerShell, or a custom interpreter, with
+  configurable argument templates.
+- Add a visual Windows symbol gallery and selection of image, ICO, EXE, DLL, and
   ICL icon resources.
-- Play/pause, previous track, next track, and stop Windows media operations.
-- A **Send shortcut** action for one key or one key combination.
-
-### Improved
-
-- The icon gallery loads in the background, virtualizes its list, and keeps
+- Add play/pause, previous track, next track, and stop Windows media operations.
+- Add a Send shortcut action for one key or one key combination.
+- Load the icon gallery in the background, virtualize its list, and keep
   keyboard focus synchronized with selection.
-- Screen readers can invoke named radial actions in icons-only mode; Enter and
+- Let screen readers invoke named radial actions in icons-only mode; Enter and
   Space both activate the selected action.
-- Settings scrolls within the monitor work area on small and high-DPI displays,
+- Keep Settings within the monitor work area on small and high-DPI displays,
   while keeping Save visible.
-- Paste, sent shortcuts, and key-based Windows operations wait for held input
-  to be released and cancel if the original target window changes.
-- Missing icon resources fall back automatically without discarding the saved
-  icon path or resource index.
-
-### Refined
-
-- Renamed **System command** to **Windows operation**, clarified operation names
-  and ordering, and added contextual hints without changing existing actions.
-- Refreshes localized action choices immediately when the language changes.
-- Uses a matching monochrome Windows command-line symbol for the default
+- Keep the Settings window at a consistent height when switching between item types.
+- Make paste, sent shortcuts, and key-based Windows operations wait for held
+  input to be released and cancel if the original target window changes.
+- Fall back automatically when icon resources are missing without discarding
+  the saved icon path or resource index.
+- Rename System command to Windows operation, clarify operation names and
+  ordering, and add contextual hints without changing existing actions.
+- Refresh localized action choices immediately when the language changes.
+- Use a matching monochrome Windows command-line symbol for the default
   PowerShell item.
 
 ## 1.4.10

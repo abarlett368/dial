@@ -36,9 +36,17 @@
   <data name="TargetLaunchApp" xml:space="preserve"><value>App path, command, or installed app</value></data>
   <data name="TargetOpenFile" xml:space="preserve"><value>File or folder path</value></data>
   <data name="TargetOpenUrl" xml:space="preserve"><value>URL, such as https://example.com</value></data>
-  <data name="TargetRunScript" xml:space="preserve"><value>Command or script path</value></data>
+  <data name="TargetRunScript" xml:space="preserve"><value>Command to execute</value></data>
   <data name="TargetClipboard" xml:space="preserve"><value>Text to paste</value></data>
   <data name="ArgsField" xml:space="preserve"><value>Arguments (optional)</value></data>
+  <data name="ScriptInterpreterField" xml:space="preserve"><value>Command interpreter</value></data>
+  <data name="ScriptInterpreterCmd" xml:space="preserve"><value>Command Prompt (cmd.exe)</value></data>
+  <data name="ScriptInterpreterPowerShell" xml:space="preserve"><value>PowerShell</value></data>
+  <data name="ScriptInterpreterCustom" xml:space="preserve"><value>Custom executable</value></data>
+  <data name="ScriptInterpreterPath" xml:space="preserve"><value>Interpreter executable path</value></data>
+  <data name="ScriptInterpreterArguments" xml:space="preserve"><value>Interpreter arguments template (optional)</value></data>
+  <data name="ScriptInterpreterHint" xml:space="preserve"><value>Use {command} where the command should go in the argument template. Without {command}, the command is appended.</value></data>
+  <data name="ScriptInterpreterRequired" xml:space="preserve"><value>Choose an executable for the custom interpreter.</value></data>
   <data name="CommandField" xml:space="preserve"><value>Windows operation</value></data>
   <data name="CommandSessionHint" xml:space="preserve"><value>Activating this sector immediately requests this action without a dial confirmation. Save your work first.</value></data>
   <data name="CommandLockSleepHint" xml:space="preserve"><value>Activating this sector immediately locks the PC or puts it to sleep, depending on the selected action.</value></data>
