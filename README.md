@@ -90,7 +90,7 @@ Select Save to apply changes.
 | Paste text | Paste saved text into the active app |
 | Send shortcut | Send a key or key combination to the active app |
 
-### Feature details
+### Usage details
 
 Use Apps... to select an installed application or Browse... to choose an
 executable. The Run as administrator option is available for supported desktop
