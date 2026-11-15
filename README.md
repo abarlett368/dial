@@ -148,7 +148,7 @@ Item names and custom text icons support up to 64 characters. Image files can
 also be used as icons. **Choose icon...** opens a visual grid of Windows font
 symbols; select a symbol and choose **Select**, or double-click it. **Browse...**
 in this dialog selects an image or ICO file, or previews icon resources from
-an EXE, DLL, or ICL file. **Windows symbols** returns to the built-in font icons.
+an EXE, DLL, or ICL file. **Refresh** returns to the built-in font icons.
 Icons load in the background into the scrollable gallery; **Cancel** remains
 available. The Windows symbol list is cached while dial is running.
 The available symbols depend on the installed Segoe Fluent Icons and Segoe MDL2

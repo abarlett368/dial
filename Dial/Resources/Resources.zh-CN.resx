@@ -48,7 +48,7 @@
   <data name="ChooseIcon" xml:space="preserve"><value>选择图标...</value></data>
   <data name="IconPickerTitle" xml:space="preserve"><value>选择图标</value></data>
   <data name="IconPickerHint" xml:space="preserve"><value>直接选择下方的 Windows 字符图标，或浏览图片、ICO、EXE、DLL 和图标库文件。</value></data>
-  <data name="SystemIcons" xml:space="preserve"><value>Windows 字符图标</value></data>
+  <data name="SystemIcons" xml:space="preserve"><value>刷新</value></data>
   <data name="LoadingIcons" xml:space="preserve"><value>正在加载图标...</value></data>
   <data name="SystemIconsUnavailable" xml:space="preserve"><value>未找到 Windows 图标字体。请通过“浏览”选择图片或图标资源。</value></data>
   <data name="IconResourceItem" xml:space="preserve"><value>图标 {0}</value></data>

@@ -48,7 +48,7 @@
   <data name="ChooseIcon" xml:space="preserve"><value>Choose icon...</value></data>
   <data name="IconPickerTitle" xml:space="preserve"><value>Choose an icon</value></data>
   <data name="IconPickerHint" xml:space="preserve"><value>Choose a Windows symbol below, or browse for an image, ICO, EXE, DLL, or icon library.</value></data>
-  <data name="SystemIcons" xml:space="preserve"><value>Windows symbols</value></data>
+  <data name="SystemIcons" xml:space="preserve"><value>Refresh</value></data>
   <data name="LoadingIcons" xml:space="preserve"><value>Loading icons...</value></data>
   <data name="SystemIconsUnavailable" xml:space="preserve"><value>Windows icon fonts are unavailable. Use Browse to choose an image or icon resource.</value></data>
   <data name="IconResourceItem" xml:space="preserve"><value>Icon {0}</value></data>
