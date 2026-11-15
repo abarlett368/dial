@@ -1,13 +1,13 @@
 # dial
 
-dial is a radial launcher for Windows. Open it with a keyboard shortcut and
-choose an action from the wheel with your mouse or keyboard. Actions can open
-apps, files, folders, and URLs, run commands, paste text, or send shortcuts.
-
 [Microsoft Store](https://apps.microsoft.com/detail/9NGB80VW459K) |
 [Portable download](https://github.com/abarlett368/dial/releases/latest) |
 [User guide](#user-guide) |
 [Release notes](CHANGELOG.md)
+
+dial is a radial launcher for Windows. Press a keyboard shortcut to open the
+wheel, then choose an action with your mouse or keyboard. It can open apps,
+files, folders, and URLs, run commands, paste text, or send shortcuts.
 
 Download the portable build from GitHub or install Dial Menu from the Microsoft
 Store. Store updates are delivered through the Store.
@@ -35,13 +35,13 @@ See the [1.4.11 release notes](CHANGELOG.md#1411).
 - Select icons from Windows symbols and common image or executable resources.
 - Use the interface in English or Simplified Chinese.
 
-## Installation
+## Requirements
 
 Requires 64-bit Windows 10, version 1809 or later, or Windows 11.
 
 ### Microsoft Store
 
-Install [Dial Menu from the Microsoft Store](https://apps.microsoft.com/detail/9NGB80VW459K).
+[Get Dial Menu from the Microsoft Store](https://apps.microsoft.com/detail/9NGB80VW459K).
 
 ### Portable version
 
@@ -142,7 +142,7 @@ with less available space, its content scrolls and Save stays accessible.
 
 Choose a light or dark theme, a preset accent color, or Windows accent. The
 wheel can show labels and icons together, labels only, or icons only. You can
-also hide the center button and position the wheel at the pointer or center it
+also hide the center button and position the wheel near the pointer or center it
 on the active monitor.
 
 Screen readers can identify and activate items in every layout. Use Enter or
