@@ -207,8 +207,9 @@ For more information, see the [Privacy Policy for Dial Menu](https://cdn.storeed
 | Shortcut action is cancelled | Release any keyboard key or mouse button that is still pressed, and keep the target app active |
 
 Run `dial.exe --settings` to open Settings directly. To use a different
-settings file, close dial first, then run `dial.exe --config "<path>/settings"`,
-replacing `<path>` with the directory that contains the target file.
+settings file, close dial first, then run
+`dial.exe --config "<path>\settings.json"`, replacing `<path>` with the
+directory that contains the target JSON file.
 
 Report problems through [GitHub Issues](https://github.com/abarlett368/dial/issues).
 Include the app version, Windows version, and steps that reproduce the issue.
