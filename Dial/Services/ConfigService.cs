@@ -36,7 +36,7 @@ public sealed class ConfigService
     {
         var config = JsonSerializer.Deserialize<MenuConfig>(json, Options)
             ?? throw new InvalidDataException(LocalizationService.T("InvalidConfiguration"));
-        Validate(config);
+        Validate(config, validateResourceFiles: false);
         return config;
     }
 
@@ -64,7 +64,9 @@ public sealed class ConfigService
         Validate(config);
         return JsonSerializer.Serialize(config, Options);
     }
-    public static void Validate(MenuConfig config)
+    public static void Validate(MenuConfig config) => Validate(config, validateResourceFiles: true);
+
+    private static void Validate(MenuConfig config, bool validateResourceFiles)
     {
         if (config is null)
             throw new InvalidDataException(LocalizationService.T("InvalidConfiguration"));
@@ -80,11 +82,20 @@ public sealed class ConfigService
         {
             if (item is null || item.Label is null || item.Label.Length > DialGeometry.MaximumTextLength ||
                 item.Icon is null || item.Target is null || item.Arguments is null ||
-                !Enum.IsDefined(item.Type) || !Enum.IsDefined(item.Command))
+                item.IconIndex is < -1 || !Enum.IsDefined(item.Type) || !Enum.IsDefined(item.Command))
                 throw new InvalidDataException(LocalizationService.T("InvalidItem"));
-            if (item.Icon.Length > DialGeometry.MaximumTextLength &&
+            bool resourceIcon = item.IconIndex is int index && index >= 0;
+            if (!resourceIcon && item.Icon.Length > DialGeometry.MaximumTextLength &&
                 !File.Exists(Environment.ExpandEnvironmentVariables(item.Icon)))
                 throw new InvalidDataException(LocalizationService.T("InvalidIcon"));
+            if (resourceIcon && string.IsNullOrWhiteSpace(item.Icon))
+                throw new InvalidDataException(LocalizationService.T("InvalidIcon"));
+            if (validateResourceFiles && item.IconIndex is int iconIndex && iconIndex >= 0)
+            {
+                string iconPath = Environment.ExpandEnvironmentVariables(item.Icon);
+                if (!File.Exists(iconPath) || iconIndex >= IconHelper.GetResourceIconCount(iconPath))
+                    throw new InvalidDataException(LocalizationService.T("InvalidIcon"));
+            }
             if (!item.Enabled) continue;
             if (item.Type == MenuItemType.LaunchApp && item.RunAsAdministrator &&
                 !ActionExecutor.SupportsElevation(item.Target))
@@ -94,6 +105,14 @@ public sealed class ConfigService
             if (item.Type != MenuItemType.SystemCommand && string.IsNullOrWhiteSpace(item.Target))
                 throw new InvalidDataException(string.Format(LocalizationService.CurrentCulture,
                     LocalizationService.T("TargetRequired"), item.Label));
+            if (item.Type == MenuItemType.SendShortcut)
+            {
+                if (!HotkeyService.TryParseShortcut(item.Target, out uint mods, out uint key))
+                    throw new InvalidDataException(LocalizationService.T("InvalidActionShortcut"));
+                HotkeyService.TryParse(config.Hotkey, out uint activationMods, out uint activationKey);
+                if (mods == activationMods && key == activationKey)
+                    throw new InvalidDataException(LocalizationService.T("ShortcutActivationConflict"));
+            }
             if (item.Type == MenuItemType.OpenUrl &&
                 (!Uri.TryCreate(item.Target, UriKind.Absolute, out var uri) || uri.IsFile))
                 throw new InvalidDataException(LocalizationService.T("InvalidUrl"));
@@ -113,7 +132,8 @@ public sealed class ConfigService
             new() { Label = "This PC", Type = MenuItemType.LaunchApp, Target = "explorer.exe",
                 Arguments = "shell:MyComputerFolder", Icon = "\uE770" },
             new() { Label = "Microsoft Store", Type = MenuItemType.OpenUrl, Target = "ms-windows-store:", Icon = "\uE719" },
-            new() { Label = "Windows PowerShell", Type = MenuItemType.LaunchApp, Target = "powershell.exe" },
+            new() { Label = "Windows PowerShell", Type = MenuItemType.LaunchApp, Target = "powershell.exe",
+                Icon = "\uE756" },
             new() { Label = "Screenshot", Type = MenuItemType.SystemCommand, Command = SystemCommand.Screenshot },
             new() { Label = "Bing", Type = MenuItemType.OpenUrl, Target = "https://www.bing.com" },
             new() { Label = "Paste email", Type = MenuItemType.ClipboardSnippet, Target = "you@example.com" },

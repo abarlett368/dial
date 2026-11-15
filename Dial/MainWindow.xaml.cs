@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Dial.Models;
@@ -51,6 +52,9 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<MenuItemModel> _items;
     private bool _loading;
     private bool _recordingHotkey;
+    private MenuItemModel? _recordingShortcutItem;
+    private string _previousActionShortcut = "";
+    private bool _updatingWorkArea;
     private bool _saving;
     private string _previousHotkey = "";
     public event Action<bool>? ShortcutRecordingChanged;
@@ -122,7 +126,12 @@ public partial class MainWindow : Window
             ThemeService.WindowAppearanceChanged -= ApplyTitleBarTheme;
         };
         Closing += (_, e) => { if (_saving) e.Cancel = true; };
-        SourceInitialized += (_, _) => ApplyTitleBarTheme();
+        SourceInitialized += (_, _) =>
+        {
+            ApplyTitleBarTheme();
+            UpdateWorkAreaLimits();
+        };
+        LocationChanged += (_, _) => UpdateWorkAreaLimits();
         ThemeService.WindowAppearanceChanged += ApplyTitleBarTheme;
     }
 
@@ -166,6 +175,61 @@ public partial class MainWindow : Window
         ThemeService.ApplyWindowAppearance(this);
     }
 
+    protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
+    {
+        base.OnDpiChanged(oldDpi, newDpi);
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => UpdateWorkAreaLimits());
+    }
+
+    private void UpdateWorkAreaLimits()
+    {
+        if (_updatingWorkArea) return;
+        IntPtr handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero) return;
+        var info = new MonitorInformation { Size = Marshal.SizeOf<MonitorInformation>() };
+        if (!GetMonitorInfo(MonitorFromWindow(handle, 2), ref info))
+        {
+            ErrorService.LogError("WindowLayoutError", new Win32Exception(Marshal.GetLastWin32Error()));
+            return;
+        }
+        var dpi = VisualTreeHelper.GetDpi(this);
+        ApplyWorkAreaLimits(new Size((info.Work.Right - info.Work.Left) / dpi.DpiScaleX,
+            (info.Work.Bottom - info.Work.Top) / dpi.DpiScaleY));
+    }
+
+    private void ApplyWorkAreaLimits(Size available)
+    {
+        _updatingWorkArea = true;
+        try
+        {
+            MaxWidth = available.Width;
+            MaxHeight = available.Height;
+            Width = Math.Min(920, available.Width);
+        }
+        finally { _updatingWorkArea = false; }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MonitorRectangle
+    {
+        public int Left, Top, Right, Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MonitorInformation
+    {
+        public int Size;
+        public MonitorRectangle Monitor, Work;
+        public uint Flags;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr window, uint flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInformation info);
+
     private void RebuildLocalizedLists()
     {
         string theme = (ThemeBox.SelectedItem as ThemeItem)?.Code ?? _config.Theme;
@@ -183,37 +247,45 @@ public partial class MainWindow : Window
             new TypeItem(MenuItemType.SystemCommand, "TypeSystemCommand"),
             new TypeItem(MenuItemType.RunScript, "TypeRunScript"),
             new TypeItem(MenuItemType.ClipboardSnippet, "TypeClipboard"),
+            new TypeItem(MenuItemType.SendShortcut, "TypeSendShortcut"),
         };
 
         _commandItems = new[]
         {
-            new CommandItem(SystemCommand.Lock, "CmdLock"),
-            new CommandItem(SystemCommand.Sleep, "CmdSleep"),
-            new CommandItem(SystemCommand.Restart, "CmdRestart"),
-            new CommandItem(SystemCommand.Shutdown, "CmdShutdown"),
-            new CommandItem(SystemCommand.SignOut, "CmdSignOut"),
+            new CommandItem(SystemCommand.Screenshot, "CmdScreenshot"),
+            new CommandItem(SystemCommand.ShowDesktop, "CmdShowDesktop"),
+            new CommandItem(SystemCommand.ClipboardHistory, "CmdClipboardHistory"),
+            new CommandItem(SystemCommand.EmojiPanel, "CmdEmojiPanel"),
+            new CommandItem(SystemCommand.TaskManager, "CmdTaskManager"),
+            new CommandItem(SystemCommand.OpenSettings, "CmdOpenSettings"),
+            new CommandItem(SystemCommand.ControlPanel, "CmdControlPanel"),
+            new CommandItem(SystemCommand.RunDialog, "CmdRunDialog"),
             new CommandItem(SystemCommand.VolumeUp, "CmdVolumeUp"),
             new CommandItem(SystemCommand.VolumeDown, "CmdVolumeDown"),
             new CommandItem(SystemCommand.VolumeMute, "CmdVolumeMute"),
-            new CommandItem(SystemCommand.Screenshot, "CmdScreenshot"),
-            new CommandItem(SystemCommand.TaskManager, "CmdTaskManager"),
-            new CommandItem(SystemCommand.ShowDesktop, "CmdShowDesktop"),
+            new CommandItem(SystemCommand.MediaPlayPause, "CmdMediaPlayPause"),
+            new CommandItem(SystemCommand.MediaPrevious, "CmdMediaPrevious"),
+            new CommandItem(SystemCommand.MediaNext, "CmdMediaNext"),
+            new CommandItem(SystemCommand.MediaStop, "CmdMediaStop"),
+            new CommandItem(SystemCommand.Lock, "CmdLock"),
+            new CommandItem(SystemCommand.Sleep, "CmdSleep"),
+            new CommandItem(SystemCommand.SignOut, "CmdSignOut"),
+            new CommandItem(SystemCommand.Restart, "CmdRestart"),
+            new CommandItem(SystemCommand.Shutdown, "CmdShutdown"),
             new CommandItem(SystemCommand.EmptyRecycleBin, "CmdEmptyRecycleBin"),
-            new CommandItem(SystemCommand.OpenSettings, "CmdOpenSettings"),
-            new CommandItem(SystemCommand.ControlPanel, "CmdControlPanel"),
-            new CommandItem(SystemCommand.ClipboardHistory, "CmdClipboardHistory"),
-            new CommandItem(SystemCommand.EmojiPanel, "CmdEmojiPanel"),
-            new CommandItem(SystemCommand.RunDialog, "CmdRunDialog"),
         };
 
+        TypeBox.ItemsSource = null;
         TypeBox.ItemsSource = _typeItems;
         TypeBox.DisplayMemberPath = nameof(TypeItem.Name);
+        CommandBox.ItemsSource = null;
         CommandBox.ItemsSource = _commandItems;
         CommandBox.DisplayMemberPath = nameof(CommandItem.Name);
 
         var selected = Selected;
         TypeBox.SelectedItem = _typeItems.FirstOrDefault(t => t.Type == selected?.Type) ?? _typeItems[0];
         CommandBox.SelectedItem = _commandItems.FirstOrDefault(c => c.Command == selected?.Command) ?? _commandItems[0];
+        UpdateCommandHint();
 
         ThemeBox.ItemsSource = null;
         ThemeBox.ItemsSource = _themeItems;
@@ -297,6 +369,7 @@ public partial class MainWindow : Window
 
     private void ItemList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        EndShortcutRecording(true);
         LoadDetail();
     }
 
@@ -332,12 +405,15 @@ public partial class MainWindow : Window
         BrowseButton.Visibility = showBrowse ? Visibility.Visible : Visibility.Collapsed;
         FolderBrowseButton.Visibility = type == MenuItemType.OpenFile ? Visibility.Visible : Visibility.Collapsed;
         InstalledAppsButton.Visibility = type == MenuItemType.LaunchApp ? Visibility.Visible : Visibility.Collapsed;
+        RecordActionShortcutButton.Visibility = type == MenuItemType.SendShortcut ? Visibility.Visible : Visibility.Collapsed;
+        ActionShortcutHint.Visibility = type == MenuItemType.SendShortcut ? Visibility.Visible : Visibility.Collapsed;
         ArgsLabel.Visibility = showArgs ? Visibility.Visible : Visibility.Collapsed;
         ArgsBox.Visibility = showArgs ? Visibility.Visible : Visibility.Collapsed;
         AdministratorBox.Visibility = showArgs ? Visibility.Visible : Visibility.Collapsed;
         UpdateElevationState();
         CmdLabel.Visibility = showCommand ? Visibility.Visible : Visibility.Collapsed;
         CommandBox.Visibility = showCommand ? Visibility.Visible : Visibility.Collapsed;
+        UpdateCommandHint();
 
         TargetLabel.Text = LocalizationService.T(type switch
         {
@@ -346,6 +422,7 @@ public partial class MainWindow : Window
             MenuItemType.OpenUrl => "TargetOpenUrl",
             MenuItemType.RunScript => "TargetRunScript",
             MenuItemType.ClipboardSnippet => "TargetClipboard",
+            MenuItemType.SendShortcut => "TargetShortcut",
             _ => "TargetField",
         });
     }
@@ -397,8 +474,25 @@ public partial class MainWindow : Window
     {
         if (_loading || Selected is null) return;
         Selected.Icon = IconBox.Text;
+        Selected.IconIndex = null;
         RefreshSelectedIcon();
         IconBox.FontFamily = new System.Windows.Media.FontFamily(Selected.DisplayFontFamily);
+    }
+
+    private void IconBrowseButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new IconPickerWindow(Selected?.Icon ?? "") { Owner = this };
+        if (dialog.ShowDialog() != true || Selected is not { } item) return;
+
+        _loading = true;
+        item.Icon = dialog.SelectedIcon;
+        item.IconIndex = dialog.SelectedIconIndex >= 0 ? dialog.SelectedIconIndex : null;
+        IconBox.Text = item.Icon;
+        _loading = false;
+        RefreshSelectedIcon();
+        IconBox.FontFamily = new System.Windows.Media.FontFamily(item.DisplayFontFamily);
+        ClearStatus();
+        UpdateSaveAccent();
     }
 
     private void EnabledBox_Changed(object sender, RoutedEventArgs e)
@@ -410,6 +504,7 @@ public partial class MainWindow : Window
     private void TypeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loading || Selected is null) return;
+        EndShortcutRecording(true);
         var t = (TypeBox.SelectedItem as TypeItem)?.Type ?? MenuItemType.LaunchApp;
         Selected.Type = t;
         UpdateFieldVisibility(t);
@@ -421,7 +516,24 @@ public partial class MainWindow : Window
         if (_loading || Selected is null) return;
         var c = (CommandBox.SelectedItem as CommandItem)?.Command ?? SystemCommand.Lock;
         Selected.Command = c;
+        UpdateCommandHint();
         RefreshSelectedIcon();
+    }
+
+    private void UpdateCommandHint()
+    {
+        string? key = Selected is { Type: MenuItemType.SystemCommand } item ? item.Command switch
+        {
+            SystemCommand.Restart or SystemCommand.Shutdown or SystemCommand.SignOut => "CommandSessionHint",
+            SystemCommand.Sleep or SystemCommand.Lock => "CommandLockSleepHint",
+            SystemCommand.EmptyRecycleBin => "CommandRecycleBinHint",
+            SystemCommand.ClipboardHistory => "CommandClipboardHint",
+            SystemCommand.MediaPlayPause or SystemCommand.MediaPrevious or SystemCommand.MediaNext
+                or SystemCommand.MediaStop => "CommandMediaHint",
+            _ => null,
+        } : null;
+        CommandHint.Text = key is null ? "" : LocalizationService.T(key);
+        CommandHint.Visibility = key is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void RefreshSelectedIcon()
@@ -490,23 +602,58 @@ public partial class MainWindow : Window
             return;
         }
 
-        var parts = new List<string>();
-        if ((Keyboard.Modifiers & ModifierKeys.Control) != 0) parts.Add("Ctrl");
-        if ((Keyboard.Modifiers & ModifierKeys.Alt) != 0) parts.Add("Alt");
-        if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) parts.Add("Shift");
-        if ((Keyboard.Modifiers & ModifierKeys.Windows) != 0) parts.Add("Win");
-        if (parts.Count == 0) return;
-        parts.Add(key.ToString());
-
-        string shortcut = string.Join("+", parts);
+        string shortcut = FormatRecordedShortcut(key);
         if (!HotkeyService.TryParse(shortcut, out _, out _)) return;
         HotkeyBox.Text = shortcut;
         EndShortcutRecording(false);
     }
 
+    private static string FormatRecordedShortcut(Key key)
+    {
+        var parts = new List<string>();
+        if ((Keyboard.Modifiers & ModifierKeys.Control) != 0) parts.Add("Ctrl");
+        if ((Keyboard.Modifiers & ModifierKeys.Alt) != 0) parts.Add("Alt");
+        if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) parts.Add("Shift");
+        if ((Keyboard.Modifiers & ModifierKeys.Windows) != 0) parts.Add("Win");
+        parts.Add(key.ToString());
+        return string.Join("+", parts);
+    }
+
+    private void TargetBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (_recordingShortcutItem is null) return;
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (key == Key.Escape || key == Key.Tab && Keyboard.Modifiers == ModifierKeys.None)
+        {
+            EndShortcutRecording(true);
+            e.Handled = key == Key.Escape;
+            return;
+        }
+        e.Handled = true;
+        string shortcut = FormatRecordedShortcut(key);
+        if (!HotkeyService.TryParseShortcut(shortcut, out _, out _)) return;
+        TargetBox.Text = shortcut;
+        EndShortcutRecording(false);
+    }
+
+    private void RecordActionShortcutButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_recordingShortcutItem is not null) { EndShortcutRecording(true); return; }
+        EndShortcutRecording(true);
+        if (Selected is not { Type: MenuItemType.SendShortcut } item) return;
+        _recordingShortcutItem = item;
+        _previousActionShortcut = item.Target;
+        RecordActionShortcutButton.Content = LocalizationService.T("Cancel");
+        TargetBox.IsReadOnly = true;
+        ShortcutRecordingChanged?.Invoke(true);
+        TargetBox.Focus();
+        ShowTransientStatus(LocalizationService.T("RecordActionShortcutHint"));
+    }
+
     private void RecordHotkeyButton_Click(object sender, RoutedEventArgs e)
     {
         if (_recordingHotkey) { EndShortcutRecording(true); return; }
+        EndShortcutRecording(true);
         _previousHotkey = HotkeyBox.Text;
         _recordingHotkey = true;
         RecordHotkeyButton.Content = LocalizationService.T("Cancel");
@@ -517,11 +664,26 @@ public partial class MainWindow : Window
 
     private void ShortcutControl_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if (e.NewFocus != RecordHotkeyButton && e.NewFocus != HotkeyBox) EndShortcutRecording(true);
+        if (_recordingHotkey && e.NewFocus != RecordHotkeyButton && e.NewFocus != HotkeyBox ||
+            _recordingShortcutItem is not null && e.NewFocus != RecordActionShortcutButton && e.NewFocus != TargetBox)
+            EndShortcutRecording(true);
     }
 
     private void EndShortcutRecording(bool cancel)
     {
+        if (_recordingShortcutItem is { } item)
+        {
+            _recordingShortcutItem = null;
+            if (cancel)
+            {
+                item.Target = _previousActionShortcut;
+                if (Selected == item) TargetBox.Text = item.Target;
+            }
+            TargetBox.IsReadOnly = false;
+            RecordActionShortcutButton.Content = LocalizationService.T("RecordShortcut");
+            ClearStatus();
+            ShortcutRecordingChanged?.Invoke(false);
+        }
         if (!_recordingHotkey) return;
         _recordingHotkey = false;
         if (cancel) HotkeyBox.Text = _previousHotkey;

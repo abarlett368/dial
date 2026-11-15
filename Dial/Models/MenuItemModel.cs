@@ -13,6 +13,8 @@ public class MenuItemModel
     public bool RunAsAdministrator { get; set; }
     public SystemCommand Command { get; set; } = SystemCommand.Lock;
     public string Icon { get; set; } = "";
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? IconIndex { get; set; }
     public bool Enabled { get; set; } = true;
 
     [JsonIgnore]

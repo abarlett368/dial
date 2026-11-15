@@ -39,8 +39,23 @@
   <data name="TargetRunScript" xml:space="preserve"><value>命令或脚本路径</value></data>
   <data name="TargetClipboard" xml:space="preserve"><value>要粘贴的文本</value></data>
   <data name="ArgsField" xml:space="preserve"><value>参数（可选）</value></data>
-  <data name="CommandField" xml:space="preserve"><value>系统命令</value></data>
-  <data name="IconField" xml:space="preserve"><value>图标（可选：图片路径或最多 64 个字符）</value></data>
+  <data name="CommandField" xml:space="preserve"><value>Windows 操作</value></data>
+  <data name="CommandSessionHint" xml:space="preserve"><value>点击此扇区会立即请求执行所选操作，dial 不会再次确认。请先保存工作。</value></data>
+  <data name="CommandLockSleepHint" xml:space="preserve"><value>点击此扇区会按所选操作立即锁定电脑或使其睡眠。</value></data>
+  <data name="CommandRecycleBinHint" xml:space="preserve"><value>清空整个回收站，而不只是选中的文件。使用前请检查回收站内容。</value></data>
+  <data name="CommandClipboardHint" xml:space="preserve"><value>打开 Windows 剪贴板历史记录（Win+V）。使用前需在 Windows 中启用剪贴板历史记录。</value></data>
+  <data name="IconField" xml:space="preserve"><value>图标（可选：图片路径、图标选择，或最多 64 个字符）</value></data>
+  <data name="ChooseIcon" xml:space="preserve"><value>选择图标...</value></data>
+  <data name="IconPickerTitle" xml:space="preserve"><value>选择图标</value></data>
+  <data name="IconPickerHint" xml:space="preserve"><value>直接选择下方的 Windows 字符图标，或浏览图片、ICO、EXE、DLL 和图标库文件。</value></data>
+  <data name="SystemIcons" xml:space="preserve"><value>Windows 字符图标</value></data>
+  <data name="LoadingIcons" xml:space="preserve"><value>正在加载图标...</value></data>
+  <data name="SystemIconsUnavailable" xml:space="preserve"><value>未找到 Windows 图标字体。请通过“浏览”选择图片或图标资源。</value></data>
+  <data name="IconResourceItem" xml:space="preserve"><value>图标 {0}</value></data>
+  <data name="SelectIconFile" xml:space="preserve"><value>选择图片或图标资源文件</value></data>
+  <data name="IconFilesFilter" xml:space="preserve"><value>图片和图标 (*.ico;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff)|*.ico;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff|可执行文件和图标库 (*.exe;*.dll;*.icl)|*.exe;*.dll;*.icl|所有文件 (*.*)|*.*</value></data>
+  <data name="NoIconResources" xml:space="preserve"><value>此文件中没有可用的图标资源。</value></data>
+  <data name="IconLoadFailed" xml:space="preserve"><value>无法读取此图片。请选择其他文件。</value></data>
   <data name="EnabledField" xml:space="preserve"><value>启用此项</value></data>
   <data name="Browse" xml:space="preserve"><value>浏览...</value></data>
   <data name="HotkeyField" xml:space="preserve"><value>键盘快捷键</value></data>
@@ -64,26 +79,43 @@
   <data name="TypeLaunchApp" xml:space="preserve"><value>启动应用</value></data>
   <data name="TypeOpenFile" xml:space="preserve"><value>打开文件或文件夹</value></data>
   <data name="TypeOpenUrl" xml:space="preserve"><value>打开网址</value></data>
-  <data name="TypeSystemCommand" xml:space="preserve"><value>系统命令</value></data>
+  <data name="TypeSystemCommand" xml:space="preserve"><value>Windows 操作</value></data>
   <data name="TypeRunScript" xml:space="preserve"><value>运行命令或脚本</value></data>
   <data name="TypeClipboard" xml:space="preserve"><value>粘贴文本</value></data>
-  <data name="CmdLock" xml:space="preserve"><value>锁定</value></data>
-  <data name="CmdSleep" xml:space="preserve"><value>睡眠</value></data>
-  <data name="CmdRestart" xml:space="preserve"><value>重新启动</value></data>
-  <data name="CmdShutdown" xml:space="preserve"><value>关机</value></data>
-  <data name="CmdSignOut" xml:space="preserve"><value>注销</value></data>
+  <data name="TypeSendShortcut" xml:space="preserve"><value>发送快捷键</value></data>
+  <data name="TargetShortcut" xml:space="preserve"><value>快捷键（例如 Ctrl+C、Win+Shift+S、F5）</value></data>
+  <data name="ActionShortcutHint" xml:space="preserve"><value>输入快捷键或点击“设置”录制。松开呼出按键后，向之前的活动窗口发送单键或组合键。不支持发送 dial 的呼出快捷键或操作 Windows 安全界面；管理员应用可能阻止输入。</value></data>
+  <data name="RecordActionShortcutHint" xml:space="preserve"><value>按下单键或组合键，Esc 或取消可停止录制。Windows 保留的快捷键可能需要手动输入。</value></data>
+  <data name="InvalidActionShortcut" xml:space="preserve"><value>请输入有效快捷键，例如 Ctrl+C、Win+Shift+S 或 F5。</value></data>
+  <data name="ShortcutActivationConflict" xml:space="preserve"><value>发送的快捷键不能与 dial 的呼出快捷键相同。</value></data>
+  <data name="ShortcutTargetError" xml:space="preserve"><value>已取消发送快捷键：原目标窗口已不再处于活动状态。</value></data>
+  <data name="ShortcutReleaseKeys" xml:space="preserve"><value>已取消发送快捷键：请松开键盘和鼠标按键后重试。</value></data>
+  <data name="ShortcutSendFailed" xml:space="preserve"><value>Windows 未接受全部键盘输入，目标可能以管理员身份运行或输入被阻止。</value></data>
+  <data name="CmdMediaPlayPause" xml:space="preserve"><value>播放／暂停</value></data>
+  <data name="CmdMediaPrevious" xml:space="preserve"><value>上一曲</value></data>
+  <data name="CmdMediaNext" xml:space="preserve"><value>下一曲</value></data>
+  <data name="CmdMediaStop" xml:space="preserve"><value>停止播放</value></data>
+  <data name="CommandMediaHint" xml:space="preserve"><value>发送 Windows 媒体键，是否响应及具体行为由媒体应用决定。</value></data>
+  <data name="PasteReleaseKeys" xml:space="preserve"><value>已取消粘贴：请松开键盘和鼠标按键后重试。</value></data>
+  <data name="SystemCommandReleaseKeys" xml:space="preserve"><value>已取消 Windows 操作：请松开键盘和鼠标按键后重试。</value></data>
+  <data name="SystemCommandTargetError" xml:space="preserve"><value>已取消 Windows 操作：原目标窗口已不再处于活动状态。</value></data>
+  <data name="CmdLock" xml:space="preserve"><value>锁定电脑</value></data>
+  <data name="CmdSleep" xml:space="preserve"><value>使电脑睡眠</value></data>
+  <data name="CmdRestart" xml:space="preserve"><value>立即重启</value></data>
+  <data name="CmdShutdown" xml:space="preserve"><value>立即关机</value></data>
+  <data name="CmdSignOut" xml:space="preserve"><value>注销 Windows</value></data>
   <data name="CmdVolumeUp" xml:space="preserve"><value>增大音量</value></data>
   <data name="CmdVolumeDown" xml:space="preserve"><value>减小音量</value></data>
-  <data name="CmdVolumeMute" xml:space="preserve"><value>静音</value></data>
-  <data name="CmdScreenshot" xml:space="preserve"><value>截图</value></data>
-  <data name="CmdTaskManager" xml:space="preserve"><value>任务管理器</value></data>
-  <data name="CmdShowDesktop" xml:space="preserve"><value>显示桌面</value></data>
+  <data name="CmdVolumeMute" xml:space="preserve"><value>切换静音</value></data>
+  <data name="CmdScreenshot" xml:space="preserve"><value>截取屏幕区域</value></data>
+  <data name="CmdTaskManager" xml:space="preserve"><value>打开任务管理器</value></data>
+  <data name="CmdShowDesktop" xml:space="preserve"><value>显示或隐藏桌面</value></data>
   <data name="CmdEmptyRecycleBin" xml:space="preserve"><value>清空回收站</value></data>
-  <data name="CmdOpenSettings" xml:space="preserve"><value>打开设置</value></data>
-  <data name="CmdControlPanel" xml:space="preserve"><value>控制面板</value></data>
-  <data name="CmdClipboardHistory" xml:space="preserve"><value>剪贴板历史记录</value></data>
-  <data name="CmdEmojiPanel" xml:space="preserve"><value>表情符号面板</value></data>
-  <data name="CmdRunDialog" xml:space="preserve"><value>运行对话框</value></data>
+  <data name="CmdOpenSettings" xml:space="preserve"><value>打开 Windows 设置</value></data>
+  <data name="CmdControlPanel" xml:space="preserve"><value>打开控制面板</value></data>
+  <data name="CmdClipboardHistory" xml:space="preserve"><value>打开剪贴板历史记录</value></data>
+  <data name="CmdEmojiPanel" xml:space="preserve"><value>打开表情符号面板</value></data>
+  <data name="CmdRunDialog" xml:space="preserve"><value>打开运行对话框</value></data>
   <data name="ThemeDark" xml:space="preserve"><value>深色</value></data>
   <data name="ThemeLight" xml:space="preserve"><value>浅色</value></data>
   <data name="AccentWindowsBlue" xml:space="preserve"><value>Windows 蓝</value></data>
@@ -135,7 +167,7 @@
   <data name="InvalidShortcut" xml:space="preserve"><value>请设置包含 Ctrl、Alt、Shift 或 Windows 键的有效快捷键。</value></data>
   <data name="InvalidAppearance" xml:space="preserve"><value>不支持所选的主题、语言、强调色或布局。</value></data>
   <data name="InvalidItem" xml:space="preserve"><value>请检查项目设置。名称最多可包含 64 个字符。</value></data>
-  <data name="InvalidIcon" xml:space="preserve"><value>请输入图片路径或最多包含 64 个字符的文本图标。</value></data>
+  <data name="InvalidIcon" xml:space="preserve"><value>请选择有效的图片或图标资源，或输入最多包含 64 个字符的文本图标。</value></data>
   <data name="NameRequired" xml:space="preserve"><value>请为每个已启用的项目输入名称。</value></data>
   <data name="TargetRequired" xml:space="preserve"><value>请为“{0}”输入目标，或禁用此项。</value></data>
   <data name="InvalidUrl" xml:space="preserve"><value>请输入完整网址，例如 https://example.com。</value></data>

@@ -1,5 +1,35 @@
 # Release notes
 
+## 1.4.11
+
+### Added
+
+- A visual Windows symbol gallery and selection of image, ICO, EXE, DLL, and
+  ICL icon resources.
+- Play/pause, previous track, next track, and stop Windows media operations.
+- A **Send shortcut** action for one key or one key combination.
+
+### Improved
+
+- The icon gallery loads in the background, virtualizes its list, and keeps
+  keyboard focus synchronized with selection.
+- Screen readers can invoke named radial actions in icons-only mode; Enter and
+  Space both activate the selected action.
+- Settings scrolls within the monitor work area on small and high-DPI displays,
+  while keeping Save visible.
+- Paste, sent shortcuts, and key-based Windows operations wait for held input
+  to be released and cancel if the original target window changes.
+- Missing icon resources fall back automatically without discarding the saved
+  icon path or resource index.
+
+### Refined
+
+- Renamed **System command** to **Windows operation**, clarified operation names
+  and ordering, and added contextual hints without changing existing actions.
+- Refreshes localized action choices immediately when the language changes.
+- Uses a matching monochrome Windows command-line symbol for the default
+  PowerShell item.
+
 ## 1.4.10
 
 - Give the app icon a frosted finish and stronger outlines.

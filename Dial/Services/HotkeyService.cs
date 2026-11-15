@@ -77,12 +77,18 @@ public sealed class HotkeyService : IDisposable
     }
 
     public static bool TryParse(string? hotkey, out uint mods, out uint vk)
+        => TryParse(hotkey, true, out mods, out vk);
+
+    public static bool TryParseShortcut(string? shortcut, out uint mods, out uint vk)
+        => TryParse(shortcut, false, out mods, out vk);
+
+    private static bool TryParse(string? hotkey, bool requireModifier, out uint mods, out uint vk)
     {
         mods = 0;
         vk = 0;
         if (string.IsNullOrWhiteSpace(hotkey)) return false;
         var parts = hotkey.Split('+', StringSplitOptions.TrimEntries);
-        if (parts.Length < 2 || parts.Any(string.IsNullOrEmpty)) return false;
+        if (requireModifier && parts.Length < 2 || parts.Any(string.IsNullOrEmpty)) return false;
 
         for (int i = 0; i < parts.Length - 1; i++)
         {

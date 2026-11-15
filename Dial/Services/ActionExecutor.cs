@@ -27,7 +27,7 @@ public static class ActionExecutor
                     OpenPath(item.Target);
                     break;
                 case MenuItemType.SystemCommand:
-                    RunSystemCommand(item.Command);
+                    await RunSystemCommandAsync(item.Command, targetWindow);
                     break;
                 case MenuItemType.RunScript:
                     RunScript(item.Target);
@@ -35,11 +35,34 @@ public static class ActionExecutor
                 case MenuItemType.ClipboardSnippet:
                     await PasteAsync(item.Target, targetWindow);
                     break;
+                case MenuItemType.SendShortcut:
+                    await SendShortcutAsync(item.Target, targetWindow);
+                    break;
             }
         }
         catch (OperationCanceledException exception) when (item.Type == MenuItemType.ClipboardSnippet)
         {
             ErrorService.Report("PasteTargetError", exception);
+        }
+        catch (OperationCanceledException exception) when (item.Type == MenuItemType.SendShortcut)
+        {
+            ErrorService.Report("ShortcutTargetError", exception);
+        }
+        catch (TimeoutException exception) when (item.Type == MenuItemType.SendShortcut)
+        {
+            ErrorService.Report("ShortcutReleaseKeys", exception);
+        }
+        catch (TimeoutException exception) when (item.Type == MenuItemType.ClipboardSnippet)
+        {
+            ErrorService.Report("PasteReleaseKeys", exception);
+        }
+        catch (OperationCanceledException exception) when (item.Type == MenuItemType.SystemCommand)
+        {
+            ErrorService.Report("SystemCommandTargetError", exception);
+        }
+        catch (TimeoutException exception) when (item.Type == MenuItemType.SystemCommand)
+        {
+            ErrorService.Report("SystemCommandReleaseKeys", exception);
         }
         catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
         {
@@ -95,7 +118,7 @@ public static class ActionExecutor
     {
         for (int i = 0; i < 5; i++)
         {
-            EnsurePasteTarget(targetWindow);
+            await WaitForPhysicalKeyReleaseAsync(() => EnsurePasteTarget(targetWindow), "PasteReleaseKeys");
             try
             {
                 Clipboard.SetText(text);
@@ -116,7 +139,54 @@ public static class ActionExecutor
             throw new OperationCanceledException(LocalizationService.T("PasteTargetError"));
     }
 
-    private static void RunSystemCommand(SystemCommand cmd)
+    private static async Task SendShortcutAsync(string shortcut, IntPtr targetWindow)
+    {
+        if (!HotkeyService.TryParseShortcut(shortcut, out uint modifiers, out uint key))
+            throw new ArgumentException(LocalizationService.T("InvalidActionShortcut"), nameof(shortcut));
+        await WaitForPhysicalKeyReleaseAsync(() => EnsureShortcutTarget(targetWindow), "ShortcutReleaseKeys");
+        var keys = new List<ushort>();
+        if ((modifiers & 2) != 0) keys.Add(0x11);
+        if ((modifiers & 1) != 0) keys.Add(0x12);
+        if ((modifiers & 4) != 0) keys.Add(0x10);
+        if ((modifiers & 8) != 0) keys.Add(0x5B);
+        keys.Add((ushort)key);
+        SendChord(keys.ToArray());
+    }
+
+    private static void EnsureShortcutTarget(IntPtr targetWindow)
+    {
+        if (targetWindow == IntPtr.Zero || GetForegroundWindow() != targetWindow)
+            throw new OperationCanceledException(LocalizationService.T("ShortcutTargetError"));
+    }
+
+    internal static async Task WaitForPhysicalKeyReleaseAsync(Action ensureTarget, string releaseErrorKey,
+        Func<bool>? anyKeyDown = null, TimeSpan? timeout = null)
+    {
+        anyKeyDown ??= () => Enumerable.Range(1, 254).Any(vk => (GetAsyncKeyState(vk) & 0x8000) != 0);
+        var timer = Stopwatch.StartNew();
+        while (true)
+        {
+            ensureTarget();
+            if (!anyKeyDown()) break;
+            if (timer.Elapsed >= (timeout ?? TimeSpan.FromSeconds(2)))
+                throw new TimeoutException(LocalizationService.T(releaseErrorKey));
+            await Task.Delay(20);
+        }
+        ensureTarget();
+    }
+
+    private static async Task SendSystemChordAsync(IntPtr targetWindow, params ushort[] keys)
+    {
+        void EnsureTarget()
+        {
+            if (targetWindow == IntPtr.Zero || GetForegroundWindow() != targetWindow)
+                throw new OperationCanceledException(LocalizationService.T("SystemCommandTargetError"));
+        }
+        await WaitForPhysicalKeyReleaseAsync(EnsureTarget, "SystemCommandReleaseKeys");
+        SendChord(keys);
+    }
+
+    private static async Task RunSystemCommandAsync(SystemCommand cmd, IntPtr targetWindow)
     {
         switch (cmd)
         {
@@ -136,19 +206,25 @@ public static class ActionExecutor
                 if (!ExitWindowsEx(0, 0)) throw new Win32Exception(Marshal.GetLastWin32Error());
                 break;
             case SystemCommand.VolumeUp:
-                PressKey(0xAF);
+                await SendSystemChordAsync(targetWindow, 0xAF);
                 break;
             case SystemCommand.VolumeDown:
-                PressKey(0xAE);
+                await SendSystemChordAsync(targetWindow, 0xAE);
                 break;
             case SystemCommand.VolumeMute:
-                PressKey(0xAD);
+                await SendSystemChordAsync(targetWindow, 0xAD);
+                break;
+            case SystemCommand.MediaPlayPause:
+            case SystemCommand.MediaPrevious:
+            case SystemCommand.MediaNext:
+            case SystemCommand.MediaStop:
+                await SendSystemChordAsync(targetWindow, MediaKeyForCommand(cmd));
                 break;
             case SystemCommand.Screenshot:
-                ComboWinShiftKey(0x53); // Win+Shift+S (VK_S)
+                await SendSystemChordAsync(targetWindow, 0x5B, 0x10, 0x53);
                 break;
             case SystemCommand.ShowDesktop:
-                ComboWinKey(0x44); // Win+D
+                await SendSystemChordAsync(targetWindow, 0x5B, 0x44);
                 break;
             case SystemCommand.TaskManager:
                 Process.Start(new ProcessStartInfo("taskmgr.exe") { UseShellExecute = true });
@@ -163,45 +239,53 @@ public static class ActionExecutor
                 Process.Start(new ProcessStartInfo("control.exe") { UseShellExecute = true });
                 break;
             case SystemCommand.ClipboardHistory:
-                ComboWinKey(0x56); // Win+V (VK_V)
+                await SendSystemChordAsync(targetWindow, 0x5B, 0x56);
                 break;
             case SystemCommand.EmojiPanel:
-                ComboWinKey(0xBE); // Win+. (VK_OEM_PERIOD)
+                await SendSystemChordAsync(targetWindow, 0x5B, 0xBE);
                 break;
             case SystemCommand.RunDialog:
-                ComboWinKey(0x52); // Win+R (VK_R)
+                await SendSystemChordAsync(targetWindow, 0x5B, 0x52);
                 break;
         }
     }
 
-    private static void PressKey(byte vk)
+    private static byte MediaKeyForCommand(SystemCommand command) => command switch
     {
-        SendChord(vk);
-    }
-
-    private static void ComboWinKey(byte vk)
-    {
-        SendChord(0x5B, vk);
-    }
-
-    private static void ComboWinShiftKey(byte vk)
-    {
-        SendChord(0x5B, 0x10, vk);
-    }
+        SystemCommand.MediaPlayPause => 0xB3,
+        SystemCommand.MediaPrevious => 0xB1,
+        SystemCommand.MediaNext => 0xB0,
+        SystemCommand.MediaStop => 0xB2,
+        _ => throw new ArgumentOutOfRangeException(nameof(command)),
+    };
 
     private static void SendChord(params ushort[] keys)
     {
-        var input = keys.Select(key => new NativeInput
+        var input = CreateChordInput(keys);
+        uint sent = SendInput((uint)input.Length, input, Marshal.SizeOf<NativeInput>());
+        if (sent != input.Length)
+        {
+            int error = Marshal.GetLastWin32Error();
+            var releases = input.Skip(keys.Length).ToArray();
+            if (SendInput((uint)releases.Length, releases, Marshal.SizeOf<NativeInput>()) != releases.Length)
+                Trace.TraceWarning("Could not release all keys after incomplete input delivery.");
+            throw new Win32Exception(error, LocalizationService.T("ShortcutSendFailed"));
+        }
+    }
+
+    private static NativeInput[] CreateChordInput(ushort[] keys)
+    {
+        uint Flags(ushort key) => key is >= 0x21 and <= 0x28 or 0x2D or 0x2E
+            or 0x5B or 0x5C or 0x6F or 0x90 or 0xA3 or 0xA5 or >= 0xA6 and <= 0xB7 ? 1u : 0u;
+        return keys.Select(key => new NativeInput
         {
             Type = 1,
-            Data = new InputUnion { Keyboard = new KeyboardInput { VirtualKey = key } }
+            Data = new InputUnion { Keyboard = new KeyboardInput { VirtualKey = key, Flags = Flags(key) } }
         }).Concat(keys.Reverse().Select(key => new NativeInput
         {
             Type = 1,
-            Data = new InputUnion { Keyboard = new KeyboardInput { VirtualKey = key, Flags = 2 } }
+            Data = new InputUnion { Keyboard = new KeyboardInput { VirtualKey = key, Flags = Flags(key) | 2 } }
         })).ToArray();
-        if (SendInput((uint)input.Length, input, Marshal.SizeOf<NativeInput>()) != input.Length)
-            throw new Win32Exception(Marshal.GetLastWin32Error());
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -244,6 +328,9 @@ public static class ActionExecutor
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int virtualKey);
 
     [DllImport("user32.dll")]
     private static extern bool LockWorkStation();

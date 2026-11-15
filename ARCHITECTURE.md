@@ -61,6 +61,12 @@ Win32/HRESULT error codes to localized reasons for inline and dialog errors.
 Unknown failures retain their localized operation message rather than appending
 raw exception text. Draft validation retains its
 specific localized field messages.
+Applying a language change resets the type and command item sources before
+rebinding them, forcing WPF to refresh rendered labels even when the replacement
+records compare equal. The selected type and command are restored by identity.
+Settings constrains its size to the current monitor's work area in logical DIPs,
+updating on monitor and DPI changes. The body has a scrollable viewport with a
+bounded content width so wrapping remains normal; the Save/status header stays fixed.
 
 The About button opens an owned modal [`AboutWindow`](Dial/AboutWindow.xaml).
 It shares the Settings version text and live language/theme resources without
@@ -79,7 +85,42 @@ center visibility, startup choice, and up to 16 actions. The first-run defaults
 are This PC, Microsoft Store, Windows PowerShell, Screenshot, Bing, Paste email,
 Task Manager, and Settings.
 
+## Item icons
+
+[`IconHelper`](Dial/Services/IconHelper.cs) resolves an explicit `Icon` value
+before automatic application/file icons or the symbols in
+[`MenuGlyphs`](Dial/Models/MenuGlyphs.cs). A single private-use character is
+rendered with Segoe Fluent Icons / Segoe MDL2 Assets; other custom text uses
+Segoe UI. An empty field preserves automatic resolution without writing its
+result back to the configuration.
+
+[`IconPickerWindow`](Dial/IconPickerWindow.xaml) opens with the installed Windows
+fonts' private-use characters. It also accepts image/ICO files and enumerates
+EXE/DLL/ICL resources through `ExtractIconEx`. A resource choice stores the path
+in `Icon` and its zero-based index in nullable `IconIndex`; null is omitted from
+JSON for ordinary image/text icons. Manual icon edits clear the resource index.
+No image bytes are embedded in settings. Load/reload tolerate an unavailable
+indexed icon library or resource while retaining its path/index; resolution falls
+back to the automatic icon. Save/export validation remains strict. The native
+`ExtractIconEx` failure sentinel is logged and rejected before enumeration.
+Extracted images are frozen for cross-thread use and native icon handles are
+released after conversion.
+
+Loading starts after the dialog is loaded, with font enumeration and file/resource
+work off the dispatcher. The font list is cached for the process; per-dialog
+selection state is independent. A recycling virtualized row list realizes only
+the visible portion of the scrollable grid. Resizing regroups rows while retaining
+selection. Plain status text indicates loading, Cancel remains available, and
+closing cancels pending work before it can update the closed window.
+Keyboard focus selects its icon, and arrow/Home/End navigation realizes and
+focuses the selected button, preventing confirmation of a different symbol.
+
 ## Dial layout and rendering
+
+Radial action canvases expose named button automation peers with invocation and
+selection patterns even in icons-only mode. Their bounds and clickable points
+follow sector geometry; rebuilding invalidates the accessible tree, and detached
+peers are disabled. Arrow navigation moves focus; Enter and Space activate actions.
 
 [`DialGeometry`](Dial/Models/DialGeometry.cs) defines the shared layout used by
 the WPF dial, hit testing, native material masks, and icon generator.
@@ -249,6 +290,30 @@ snippets. Configured commands and scripts are local user input and run with the
 user's permissions. Elevation is an opt-in property of supported executable
 and installed-app launches; Windows displays the UAC prompt. The dial process itself remains
 unelevated.
+The default Microsoft Store action activates `ms-windows-store:` through the
+URI handler rather than an installed-app identity. Both routes are supported.
+The Control Panel system command launches `control.exe`; Open Settings instead
+activates `ms-settings:`.
+Settings labels this type Windows operation. Its display list is ordered
+independently of the unchanged `SystemCommand` enum values used in configuration.
+Old-version configuration compatibility is not a design requirement; there is no
+version migration or legacy alias layer. Model defaults serve current new objects,
+and missing-library fallback serves current runtime reliability.
+Localized contextual hints track the selected operation and are hidden for other
+types; they do not add an execution confirmation or change Windows API calls.
+The four media actions send the corresponding Windows media virtual keys.
+`SendShortcut` is a `MenuItemType`; the media commands are `SystemCommand` values.
+Shortcut actions store their chord in `Target` without new required JSON fields.
+They share the hotkey parser but allow a single non-modifier key; global activation
+still requires a modifier. Validation rejects a chord equivalent to activation.
+The editor's recorder uses the existing registration-suspension event and cancels
+when editing switches items or types.
+Shortcut, fixed-key Windows operation and clipboard-paste delivery check the
+previous foreground window, wait up to two seconds
+for held keyboard/mouse buttons to be released, and recheck focus before input.
+Native input marks extended keys, releases keys in reverse order, and attempts
+key-up cleanup if Windows accepts only part of the chord. This does not bypass
+UIPI or secure desktops, and focus changes/input delivery cannot be made atomic.
 `ActionExecutor.SupportsElevation` is shared by the editor, configuration
 validation, and launch preparation. Installed apps are queried through
 `IShellItem.BindToHandler(BHID_SFUIObject)` and `IContextMenu.GetCommandString`

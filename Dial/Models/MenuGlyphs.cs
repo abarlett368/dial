@@ -10,6 +10,7 @@ public static class MenuGlyphs
         MenuItemType.SystemCommand => "\uE713", // Settings
         MenuItemType.RunScript => "\uE756",   // CommandPrompt
         MenuItemType.ClipboardSnippet => "\uE77F", // Paste
+        MenuItemType.SendShortcut => "\uE765", // Keyboard
         _ => "\uE713",
     };
 
@@ -32,6 +33,10 @@ public static class MenuGlyphs
         SystemCommand.ClipboardHistory => "\uE77F",
         SystemCommand.EmojiPanel => "\uE76E",
         SystemCommand.RunDialog => "\uE756",
+        SystemCommand.MediaPlayPause => "\uE768",
+        SystemCommand.MediaPrevious => "\uE892",
+        SystemCommand.MediaNext => "\uE893",
+        SystemCommand.MediaStop => "\uE71A",
         _ => "\uE713",
     };
 }

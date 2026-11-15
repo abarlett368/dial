@@ -27,15 +27,33 @@ public static class IconHelper
         if (!string.IsNullOrWhiteSpace(item.Icon))
         {
             string iconPath = Environment.ExpandEnvironmentVariables(item.Icon);
-            if (File.Exists(iconPath))
+            if (item.IconIndex is int iconIndex && iconIndex >= 0)
             {
-                var img = LoadImage(iconPath);
-                if (img is not null) return new IconSpec(null, img);
+                try
+                {
+                    if (iconIndex < GetResourceIconCount(iconPath))
+                    {
+                        var resourceIcon = GetCachedResourceIcon(iconPath, iconIndex);
+                        if (resourceIcon is not null) return new IconSpec(null, resourceIcon);
+                    }
+                }
+                catch (IOException)
+                {
+                    // An optional resource must not prevent the normal automatic icon fallback.
+                }
             }
+            else
+            {
+                if (File.Exists(iconPath))
+                {
+                    var img = LoadImage(iconPath);
+                    if (img is not null) return new IconSpec(null, img);
+                }
 
-            string text = item.Icon.Length > 64 ? item.Icon[..64] : item.Icon;
-            bool isGlyph = text.Length == 1 && IsFluentGlyph(text[0]);
-            return new IconSpec(text, null, IsText: !isGlyph);
+                string text = item.Icon.Length > 64 ? item.Icon[..64] : item.Icon;
+                bool isGlyph = text.Length == 1 && IsFluentGlyph(text[0]);
+                return new IconSpec(text, null, IsText: !isGlyph);
+            }
         }
 
         switch (item.Type)
@@ -77,6 +95,67 @@ public static class IconHelper
         if (img is not null) IconCache[key] = img;
         return img;
     }
+
+    private static ImageSource? GetCachedResourceIcon(string path, int index)
+    {
+        string key = $"{path.ToLowerInvariant()}|{index}";
+        if (IconCache.TryGetValue(key, out var cached)) return cached;
+
+        var image = LoadResourceIcon(path, index);
+        if (image is not null) IconCache[key] = image;
+        return image;
+    }
+
+    public static int GetResourceIconCount(string path)
+    {
+        if (!File.Exists(path)) return 0;
+        return ValidateResourceIconCount(ExtractIconEx(path, -1, null, null, 0));
+    }
+
+    internal static int ValidateResourceIconCount(uint count)
+    {
+        if (count > int.MaxValue)
+        {
+            var exception = new IOException(count == uint.MaxValue
+                ? "ExtractIconEx failed (UINT_MAX)."
+                : "ExtractIconEx returned an unsupported icon count.");
+            ErrorService.LogError("IconLoadFailed", exception);
+            throw exception;
+        }
+        return (int)count;
+    }
+
+    public static ImageSource? LoadResourceIcon(string path, int index)
+    {
+        if (index < 0 || !File.Exists(path)) return null;
+
+        var largeIcons = new IntPtr[1];
+        var smallIcons = new IntPtr[1];
+        uint extracted = ExtractIconEx(path, index, largeIcons, smallIcons, 1);
+        IntPtr iconHandle = largeIcons[0] != IntPtr.Zero ? largeIcons[0] : smallIcons[0];
+
+        try
+        {
+            ValidateResourceIconCount(extracted);
+            if (extracted == 0 || iconHandle == IntPtr.Zero) return null;
+            var source = Imaging.CreateBitmapSourceFromHIcon(iconHandle, Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
+            source.Freeze();
+            return source;
+        }
+        catch (Exception exception) when (exception is ExternalException or ArgumentException)
+        {
+            Trace.TraceWarning("Could not load icon {0} from resource {1}: {2}", index, path, exception.Message);
+            return null;
+        }
+        finally
+        {
+            if (largeIcons[0] != IntPtr.Zero) DestroyIcon(largeIcons[0]);
+            if (smallIcons[0] != IntPtr.Zero) DestroyIcon(smallIcons[0]);
+        }
+    }
+
+    public static ImageSource? LoadImageFile(string path) => LoadImage(path);
 
     private static bool IsFluentGlyph(char c) => c is >= '\uE000' and <= '\uF8FF';
 
@@ -173,6 +252,10 @@ public static class IconHelper
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
     private static extern IntPtr SHGetFileInfo(
         string pszPath, uint dwFileAttributes, ref ShellFileInfo psfi, uint cbFileInfo, uint uFlags);
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern uint ExtractIconEx(
+        string file, int index, [Out] IntPtr[]? largeIcons, [Out] IntPtr[]? smallIcons, uint iconCount);
 
     [DllImport("user32.dll")]
     private static extern bool DestroyIcon(IntPtr IconHandle);

@@ -7,7 +7,8 @@ public enum MenuItemType
     OpenUrl,
     SystemCommand,
     RunScript,
-    ClipboardSnippet
+    ClipboardSnippet,
+    SendShortcut
 }
 
 public enum SystemCommand
@@ -28,5 +29,9 @@ public enum SystemCommand
     ControlPanel,
     ClipboardHistory,
     EmojiPanel,
-    RunDialog
+    RunDialog,
+    MediaPlayPause,
+    MediaPrevious,
+    MediaNext,
+    MediaStop
 }

@@ -2,6 +2,9 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -111,6 +114,101 @@ public partial class RadialWindow : Window
     {
         _allowBackdrop = allowBackdrop;
         InitializeComponent();
+    }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new RadialAutomationPeer(this);
+
+    private sealed class RadialAutomationPeer(RadialWindow window) : WindowAutomationPeer(window), ISelectionProvider
+    {
+        public override object? GetPattern(PatternInterface patternInterface) =>
+            patternInterface == PatternInterface.Selection ? this : base.GetPattern(patternInterface);
+
+        protected override List<AutomationPeer> GetChildrenCore() => window._sectorContents
+            .Select(content => UIElementAutomationPeer.CreatePeerForElement(content))
+            .OfType<AutomationPeer>().ToList();
+
+        public bool CanSelectMultiple => false;
+        public bool IsSelectionRequired => false;
+        public IRawElementProviderSimple[] GetSelection() =>
+            window._selectedIndex >= 0 && window._selectedIndex < window._sectorContents.Count &&
+            UIElementAutomationPeer.CreatePeerForElement(window._sectorContents[window._selectedIndex]) is { } peer
+                ? [ProviderFromPeer(peer)] : [];
+    }
+
+    private sealed class SectorCanvas(RadialWindow window, MenuItemModel item, int index) : Canvas
+    {
+        public bool IsCurrent => index < window._sectorContents.Count &&
+            ReferenceEquals(window._sectorContents[index], this);
+        protected override AutomationPeer OnCreateAutomationPeer() => new SectorAutomationPeer(this, window, item, index);
+        protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
+        {
+            base.OnGotKeyboardFocus(e);
+            if (IsCurrent) window.SetSelected(index);
+        }
+    }
+
+    private sealed class SectorAutomationPeer(SectorCanvas content, RadialWindow window, MenuItemModel item, int index)
+        : FrameworkElementAutomationPeer(content), IInvokeProvider, ISelectionItemProvider
+    {
+        protected override string GetNameCore() => item.Label;
+        protected override string GetClassNameCore() => "DialSector";
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Button;
+        protected override bool IsControlElementCore() => true;
+        protected override bool IsContentElementCore() => true;
+        protected override bool IsKeyboardFocusableCore() => true;
+        protected override bool IsEnabledCore() => content.IsCurrent && window.IsVisible && !window._closed &&
+            !window._executing && window._dismissTask is not { IsCompleted: false };
+        protected override bool IsOffscreenCore() => !content.IsCurrent || !window.IsVisible;
+        protected override List<AutomationPeer> GetChildrenCore() => [];
+        protected override Rect GetBoundingRectangleCore()
+        {
+            if (!content.IsCurrent || !window.IsVisible || content.Clip is null) return Rect.Empty;
+            var bounds = content.Clip.Bounds;
+            return new Rect(content.PointToScreen(bounds.TopLeft), content.PointToScreen(bounds.BottomRight));
+        }
+        protected override Point GetClickablePointCore() => !content.IsCurrent || !window.IsVisible
+            ? new Point(double.NaN, double.NaN)
+            : content.PointToScreen(DialGeometry.Polar((DialGeometry.InnerRadius + DialGeometry.OuterRadius) / 2,
+                DialGeometry.CenterAngle(index, window._items.Count)));
+        protected override void SetFocusCore()
+        {
+            if (!IsEnabled()) throw new ElementNotEnabledException();
+            content.Focus();
+            window.SetSelected(index);
+        }
+        public override object? GetPattern(PatternInterface patternInterface) => patternInterface switch
+        {
+            PatternInterface.Invoke or PatternInterface.SelectionItem => this,
+            _ => base.GetPattern(patternInterface),
+        };
+        public bool IsSelected => content.IsCurrent && window._selectedIndex == index;
+        public IRawElementProviderSimple SelectionContainer =>
+            ProviderFromPeer(UIElementAutomationPeer.CreatePeerForElement(window)
+                ?? throw new InvalidOperationException("The menu automation peer is unavailable."));
+        public void Select()
+        {
+            if (!IsEnabled()) throw new ElementNotEnabledException();
+            window.SetSelected(index);
+        }
+        public void AddToSelection()
+        {
+            if (window._selectedIndex >= 0 && window._selectedIndex != index)
+                throw new InvalidOperationException("Multiple selection is not supported.");
+            Select();
+        }
+        public void RemoveFromSelection()
+        {
+            if (!IsEnabled()) throw new ElementNotEnabledException();
+            if (IsSelected) window.SetSelected(-1);
+        }
+        public void Invoke()
+        {
+            if (!IsEnabled()) throw new ElementNotEnabledException();
+            window.Dispatcher.BeginInvoke(DispatcherPriority.Input, () =>
+            {
+                if (IsEnabled()) window.ExecuteItem(index);
+            });
+        }
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -297,6 +395,7 @@ public partial class RadialWindow : Window
         }
 
         if (_showCenter) AddCenterText();
+        UIElementAutomationPeer.FromElement(this)?.InvalidatePeer();
     }
 
     private void AddItemContent(MenuItemModel item, int index, Geometry clip)
@@ -306,8 +405,8 @@ public partial class RadialWindow : Window
 
         bool showIcons = _iconMode != IconMode.LabelsOnly;
         bool showLabels = _iconMode != IconMode.IconsOnly;
-        var content = new Canvas { Width = DesignSize, Height = DesignSize, Clip = clip,
-            RenderTransform = _sectorScales[index], IsHitTestVisible = false };
+        var content = new SectorCanvas(this, item, index) { Width = DesignSize, Height = DesignSize, Clip = clip,
+            RenderTransform = _sectorScales[index], IsHitTestVisible = false, Focusable = true };
         MenuCanvas.Children.Add(content);
         _sectorContents.Add(content);
 
@@ -850,6 +949,7 @@ public partial class RadialWindow : Window
                 e.Handled = true;
                 break;
             case Key.Enter:
+            case Key.Space:
                 if (_selectedIndex >= 0) ExecuteItem(_selectedIndex);
                 e.Handled = true;
                 break;
@@ -880,6 +980,7 @@ public partial class RadialWindow : Window
             ? (step > 0 ? 0 : n - 1)
             : (_selectedIndex + step + n) % n;
         SetSelected(next);
+        if (next < _sectorContents.Count) _sectorContents[next].Focus();
     }
 
     private async void ExecuteItem(int idx)
@@ -929,6 +1030,19 @@ public partial class RadialWindow : Window
         if (idx == _selectedIndex) return;
         int previous = _selectedIndex;
         _selectedIndex = idx;
+        if (AutomationPeer.ListenerExists(AutomationEvents.SelectionItemPatternOnElementSelected) ||
+            AutomationPeer.ListenerExists(AutomationEvents.PropertyChanged))
+        {
+            if (previous >= 0 && previous < _sectorContents.Count &&
+                UIElementAutomationPeer.CreatePeerForElement(_sectorContents[previous]) is { } oldPeer)
+                oldPeer.RaisePropertyChangedEvent(SelectionItemPatternIdentifiers.IsSelectedProperty, true, false);
+            if (idx >= 0 && idx < _sectorContents.Count &&
+                UIElementAutomationPeer.CreatePeerForElement(_sectorContents[idx]) is { } newPeer)
+            {
+                newPeer.RaisePropertyChangedEvent(SelectionItemPatternIdentifiers.IsSelectedProperty, false, true);
+                newPeer.RaiseAutomationEvent(AutomationEvents.SelectionItemPatternOnElementSelected);
+            }
+        }
         ++_selectionAnimationVersion;
         _sectorAnimating = NativeBackdrop.AnimationsEnabled;
         if (_sectorAnimating) _backdrop!.BeginAnimation();

@@ -1,14 +1,33 @@
 # dial
 
-**dial** is a Windows radial launcher implemented in C# with WPF and Win32
-integration. A configurable global hotkey opens a menu of application, file,
-URI, system-command, and text-snippet actions, with mouse and keyboard navigation.
+**dial** is a configurable radial launcher for Windows. Open it with a global
+keyboard shortcut, then choose an application, file, URL, Windows operation,
+script, text snippet, or key chord with the mouse or keyboard.
 
 [Microsoft Store](https://apps.microsoft.com/detail/9NGB80VW459K) |
 [Portable download](https://github.com/abarlett368/dial/releases/latest) |
 [User guide](#user-guide) |
 [Release notes](CHANGELOG.md) |
 [Architecture](ARCHITECTURE.md)
+
+This page describes the **1.4.11 source version**. Its portable build is
+available from the latest GitHub release. Microsoft Store updates are
+distributed separately.
+
+## What's new in 1.4.11
+
+- Choose Windows symbols in a visual icon gallery, or browse image, ICO, EXE,
+  DLL, and ICL icon resources.
+- Add play/pause, previous track, next track, stop, and a configurable
+  **Send shortcut** action.
+- Use named, keyboard-invokable radial actions with screen readers, including
+  in icons-only mode.
+- Keep Settings usable on small and high-DPI displays, with a scrollable body
+  and a visible Save button.
+- Recover from unavailable icon resources and guard key delivery against held
+  keys or a changed foreground window.
+
+See the [1.4.11 release notes](CHANGELOG.md#1411).
 
 ## Features
 
@@ -18,6 +37,7 @@ URI, system-command, and text-snippet actions, with mouse and keyboard navigatio
 - Windows system actions, including volume control, session locking, and screenshot-tool activation.
 - Up to 16 configurable menu items, with ordering and per-item enable/disable state.
 - Light and dark themes, preset or Windows accent colors, and four icon-and-label layouts.
+- Visual icon selection from Windows symbols, image/ICO files, and EXE/DLL/ICL resources.
 - English and Simplified Chinese localization.
 
 ## Installation
@@ -78,25 +98,92 @@ discarding unsaved edits leaves the active configuration unchanged.
 | Launch app | Launch an executable or supported installed app, with optional arguments |
 | Open file/folder | Open a file or directory through Windows Shell |
 | Open URL | Activate an absolute URL or supported application URI |
-| System command | Execute a built-in Windows action |
+| Windows operation | Choose a built-in Windows action without writing a command |
 | Run command/script | Execute a command line through `cmd.exe` |
 | Paste text | Write a configured snippet to the clipboard and send Ctrl+V |
+| Send shortcut | Send one key or key combination to the previously active window |
 
 **Apps...** selects an installed application, including supported Microsoft Store
 apps; **Browse...** selects an executable. **Run as administrator** is available
 for eligible targets. Windows handles elevation through UAC; dial itself remains
 unelevated. URI targets and some installed applications do not support elevation.
 
+The default Microsoft Store item uses **Open URL** with `ms-windows-store:`.
+This is a Windows application protocol, not a website; Windows opens the Store app.
+Alternatively, use **Launch app > Apps...** to select Microsoft Store.
+For Control Panel, choose **Windows operation > Open Control Panel**, or use **Launch app**
+with `control.exe`. The built-in Settings action opens Windows Settings, not Control Panel.
+
+**Windows operation** replaces the former **System command** display name;
+existing configurations and execution behavior are unchanged. The list places
+screen capture, desktop/clipboard tools and Windows utilities first, followed
+by audio controls, session/power actions and Empty Recycle Bin.
+**Toggle mute** switches between muted and unmuted; **Capture screen region**
+opens Windows screen capture rather than immediately saving an image.
+Contextual hints explain clipboard-history requirements and disruptive actions.
+Media operations include play/pause, previous track, next track and stop; they
+send Windows media keys, and the media application determines its response.
+Restart, shutdown and sign-out request execution immediately without an extra
+dial confirmation; save your work before activating those sectors.
+
+### Sending shortcuts
+
+Choose **Send shortcut**, then enter a key such as `F5` or a combination such as
+`Ctrl+C`, `Ctrl+Shift+Tab` or `Win+Shift+S`. **Set** records one key or combination;
+**Esc**, **Cancel**, or leaving the recording controls cancels recording.
+Windows-reserved combinations may need manual entry. This is a single chord,
+not a sequence, macro, or script; modifier names are Ctrl, Alt, Shift and Win.
+Number keys use WPF key names such as `D1`; arrow keys use Left, Right, Up and Down.
+
+dial restores the previous target window, waits briefly for held keyboard/mouse
+buttons to be released, and cancels if that window loses focus. Input may be
+blocked by administrator privileges or Windows security screens. The action
+cannot use dial's activation shortcut, to avoid reopening the wheel.
+The same release and target-focus checks apply to text pasting and Windows
+operations that send keys, including media controls.
+
+### Icons
+
 Item names and custom text icons support up to 64 characters. Image files can
-also be used as icons. External targets and icon resources must remain accessible
-at their configured paths. Commands and scripts are trusted configuration and
+also be used as icons. **Choose icon...** opens a visual grid of Windows font
+symbols; select a symbol and choose **Select**, or double-click it. **Browse...**
+in this dialog selects an image or ICO file, or previews icon resources from
+an EXE, DLL, or ICL file. **Windows symbols** returns to the built-in font icons.
+Icons load in the background into the scrollable gallery; **Cancel** remains
+available. The Windows symbol list is cached while dial is running.
+The available symbols depend on the installed Segoe Fluent Icons and Segoe MDL2
+Assets fonts. These symbols are Unicode characters, so they can also be copied
+into the icon field.
+Arrow keys and Home/End move both selection and keyboard focus; Enter confirms
+the focused symbol.
+
+An empty icon field means **automatic**, not no icon. Applications and files use
+their available icons; other actions use a built-in symbol based on their type
+or system command. Automatically resolved icons do not populate the editable
+field. Clear a custom value to restore automatic selection.
+Choosing a resource from an EXE, DLL, or ICL stores its file path and resource
+index; it does not copy the icon into the configuration.
+
+External targets and custom icon files must remain accessible at their configured
+paths. If a saved icon library disappears or its selected resource changes,
+dial loads the menu with an automatic icon while retaining the original path
+and index. Restore the library or clear/reselect the icon before saving.
+Commands and scripts are trusted configuration and
 are not sandboxed. System actions may change the Windows power or session state.
 
 The default email snippet contains the placeholder `you@example.com`.
+The default PowerShell shortcut uses the monochrome Windows command-line symbol (`U+E756`).
+Defaults are used when no configuration file exists. Old configuration formats
+are not a compatibility target; no migration is provided.
+
+### Saving changes
 
 If a setting is invalid or cannot be saved, a message appears beside **Save**.
 Hover over an ellipsized message to display the full text. Editing and closing
 Settings are disabled while a save is pending.
+
+Settings stays within the monitor's work area; its body scrolls when display
+scaling or a small screen leaves insufficient space. Save remains in the header.
 
 ### Appearance
 
@@ -107,6 +194,9 @@ Four layouts are available: inner labels with outer icons, inner icons with oute
 labels, labels only, or icons only. The center button is optional. Mouse-relative
 placement positions the menu near the pointer; otherwise, it is centered in the
 work area of the monitor under the pointer.
+
+Screen readers receive each action's name and button invocation/selection
+semantics, including in icons-only mode. Enter or Space activates the selected action.
 
 Transparency and animation depend on Windows settings and system support. When
 Acrylic is unavailable, the menu uses opaque surfaces. Window title bars follow
@@ -120,6 +210,9 @@ executable, then re-enable it from the new location.
 
 To update a portable copy, exit dial from its tray menu and replace `dial.exe`
 with the newer release. Per-user configuration is stored separately.
+Back up settings before replacing the executable. This version validates the
+current configuration format, not old-version compatibility. To start fresh,
+exit dial and rename the configuration file before launching again.
 
 For an MSIX installation, Windows manages package installation and updates.
 If startup has been disabled by Windows, check **Settings > Apps > Startup**.
@@ -131,14 +224,14 @@ The default configuration path is `%LOCALAPPDATA%\dial\settings.json`.
 The file is created on the first successful save.
 
 - **Backup:** exit dial and copy the configuration file.
-- **Restore:** exit dial, replace the file with a compatible backup, then restart.
+- **Restore:** exit dial, replace the file with a current-format backup, then restart.
 - **Reset:** exit dial and rename the settings file to a backup name. Start dial
   to load the eight defaults; Save creates a new file.
 - **Reload:** the tray menu's Reload command reads the saved file, not
   unsaved Settings edits.
 
 An empty item list is valid and remains empty after reload. Invalid configuration
-produces an error and is not silently overwritten. Restore a compatible backup
+produces an error and is not silently overwritten. Restore a current-format backup
 or rename the file to restore defaults.
 
 Windows may redirect application data for MSIX installations. Do not assume a
@@ -156,6 +249,10 @@ analytics, or automatic uploads of usage or error reports to the developer.
 - **Clipboard writes:** text insertion replaces the clipboard contents. Windows
   clipboard history or synchronization may retain the text. Pasting is cancelled
   if the foreground target changes, and Windows may block input to an elevated process.
+  Cancellation after a clipboard write does not restore its previous contents.
+- **Local input state:** dial processes keys during explicit shortcut recording
+  and checks held keyboard/mouse buttons before shortcut, paste and fixed-key
+  Windows operations. It does not retain a key-event history.
 - **Network resources:** external applications, URI handlers, and scripts may
   initiate network access. Resolving configured network paths or loading their
   icons may trigger Windows network access or authentication before item activation.
@@ -181,6 +278,8 @@ Review and redact logs, screenshots, and other attachments before sharing them.
 | Action execution fails | Verify the target path or URI, arguments, permissions, and installed application |
 | Text insertion fails | Verify foreground-window focus and the target process's privilege level |
 | Settings cannot load or save | Check the reported error, file format, permissions, and whether the file is locked |
+| An indexed custom icon becomes automatic | Restore its library or clear/reselect the icon before saving; unavailable indexed icons do not prevent loading |
+| Sending keys is cancelled | Release held keys/buttons and keep the intended target focused; do not bypass privilege restrictions |
 
 For diagnostics, `dial.exe --settings` opens Settings. An explicit
 `dial.exe --config "C:\path\settings.json"` uses another profile; exit the existing
