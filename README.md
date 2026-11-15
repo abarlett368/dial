@@ -9,9 +9,8 @@ apps, files, folders, and URLs, run commands, paste text, or send shortcuts.
 [User guide](#user-guide) |
 [Release notes](CHANGELOG.md)
 
-This guide covers version 1.4.11. Download the portable build from GitHub or
-install Dial Menu from the Microsoft Store. Store updates are delivered through
-the Store.
+Download the portable build from GitHub or install Dial Menu from the Microsoft
+Store. Store updates are delivered through the Store.
 
 ## What's new in 1.4.11
 
@@ -89,6 +88,8 @@ Select Save to apply changes.
 | Paste text | Paste saved text into the active app |
 | Send shortcut | Send a key or key combination to the active app |
 
+### Feature details
+
 Use Apps... to select an installed application or Browse... to choose an
 executable. The Run as administrator option is available for supported desktop
 apps and is handled by Windows.
@@ -105,8 +106,6 @@ Run command/script uses Command Prompt by default. You can select PowerShell or
 configure another executable. In a custom argument template, `{command}` marks
 where the command is inserted; without it, the command is appended.
 
-### Sending shortcuts
-
 Choose Send shortcut and select Set to record one key or a combination, such
 as `F5` or `Ctrl+Shift+Tab`. Esc, Cancel, or leaving the recording controls
 ends recording without applying it. Some Windows-reserved shortcuts must be
@@ -115,8 +114,6 @@ entered manually. Each item sends one key or combination.
 Shortcuts are sent to the app that was active before the wheel opened. Keep
 that app active; the action is cancelled if focus changes or a key remains
 held. These checks also apply to pasted text and media controls.
-
-### Icons
 
 Names and text icons can contain up to 64 characters. Choose icon... opens a
 gallery of Windows symbols. Select a symbol and choose Select, or double-click
@@ -134,8 +131,6 @@ unavailable, dial uses an automatic icon until the file is restored or another
 icon is selected.
 
 When no settings file exists, dial creates the default menu on first save.
-
-### Saving changes
 
 Settings shows an error beside Save if a value cannot be saved. While a save is
 in progress, editing and closing the window are paused.
@@ -193,6 +188,8 @@ Error logs are stored locally in `%LOCALAPPDATA%\dial\logs` and are not
 automatically uploaded. They omit clipboard text and full settings contents.
 Diagnostic trace output may include paths or application identifiers.
 
+For more information, see the [Privacy Policy for Dial Menu](https://cdn.storeedgefd.dsx.mp.microsoft.com/wus2/privacy-policy-storage/97319480/00013648632900678756/1152921505702391275/privacy_policy_adb16b86-d64d-41c8-a54c-3477e38fed30.txt).
+
 ## Troubleshooting
 
 | Symptom | Check |
@@ -234,8 +231,6 @@ Install the .NET 10 SDK, open a terminal at the repository root, and run:
 dotnet build .\Dial\Dial.csproj -c Release -warnaserror
 dotnet publish .\Dial\Dial.csproj -p:PublishProfile=Portable -o .\publish\dial-win-x64
 ```
-
-See [Release notes](CHANGELOG.md) for changes by version.
 
 ## Copyright
 
