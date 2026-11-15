@@ -114,8 +114,9 @@ ends recording without applying it. Some Windows-reserved shortcuts must be
 entered manually. Each item sends one key or combination.
 
 Shortcuts are sent to the app that was active before the wheel opened. Keep
-that app active; the action is cancelled if focus changes or a key remains
-held. These checks also apply to pasted text and media controls.
+that app active. The action is cancelled if the target window changes or a
+keyboard key or mouse button is still pressed. These checks also apply to
+pasted text and media controls.
 
 Names and text icons can contain up to 64 characters. Choose icon... opens a
 gallery of Windows symbols. Select a symbol and choose Select, or double-click
@@ -203,7 +204,7 @@ For more information, see the [Privacy Policy for Dial Menu](https://cdn.storeed
 | Text insertion fails | Check that the intended app is active and accepts input |
 | Settings cannot load or save | Read the displayed error and check file access |
 | A custom icon is missing | Restore the source file or select another icon |
-| Sending keys is cancelled | Release held keys and keep the target app active |
+| Shortcut action is cancelled | Release any keyboard key or mouse button that is still pressed, and keep the target app active |
 
 Run `dial.exe --settings` to open Settings directly. To use a different
 settings file, close dial first, then run `dial.exe --config "<path>/settings"`,

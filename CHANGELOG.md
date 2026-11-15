@@ -15,8 +15,9 @@
 - Keep Settings within the monitor work area on small and high-DPI displays,
   while keeping Save visible.
 - Keep the Settings window at a consistent height when switching between item types.
-- Make paste, sent shortcuts, and key-based Windows operations wait for held
-  input to be released and cancel if the original target window changes.
+- Make paste, sent shortcuts, and key-based Windows operations wait for
+  pressed keyboard keys and mouse buttons to be released; cancel if the
+  original target window changes.
 - Fall back automatically when icon resources are missing without discarding
   the saved icon path or resource index.
 - Rename System command to Windows operation, clarify operation names and
