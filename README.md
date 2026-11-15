@@ -206,9 +206,9 @@ Diagnostic trace output may include paths or application identifiers.
 | A custom icon is missing | Restore the source file or select another icon |
 | Sending keys is cancelled | Release held keys and keep the target app active |
 
-Run `dial.exe --settings` to open Settings directly. To use a different JSON
-settings file, close dial first, then pass the file's full path after `--config`,
-for example: `dial.exe --config "D:\dial\settings.json"`.
+Run `dial.exe --settings` to open Settings directly. To use a different
+settings file, close dial first, then run `dial.exe --config "{path}/settings"`,
+replacing `{path}` with the directory that contains the target file.
 
 Report problems through [GitHub Issues](https://github.com/abarlett368/dial/issues).
 Include the app version, Windows version, and steps that reproduce the issue.
