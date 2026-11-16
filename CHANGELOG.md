@@ -2,139 +2,111 @@
 
 ## 1.4.11
 
-- Run commands through Command Prompt, PowerShell, or a custom interpreter, with
-  configurable argument templates.
-- Add a visual Windows symbol gallery, support for image and ICO files, and
-  icon resources from EXE, DLL, and ICL files.
-- Add play/pause, previous track, next track, and stop Windows media operations.
-- Add a Send shortcut action for one key or one key combination.
-- Load the icon gallery in the background, virtualize its list, and keep
-  keyboard focus synchronized with selection.
-- Let screen readers invoke named radial actions in icons-only mode; Enter and
-  Space both activate the selected action.
+- Run commands and scripts in Command Prompt, PowerShell, or a custom
+  interpreter, with configurable argument templates.
+- Choose icons from the Windows symbol gallery, image and ICO files, or icon
+  resources in EXE, DLL, and ICL files.
+- Keep icon browsing responsive by loading the gallery in the background and
+  keeping keyboard focus in sync with the current selection.
+- Add media controls for play/pause, previous track, next track, and stop.
+- Send a single key or a key combination from a menu item.
+- Use a screen reader to select and run named items, including in icon-only
+  mode. Enter and Space both activate the selected item.
 - Keep Settings within the monitor work area on small and high-DPI displays,
-  while keeping Save visible.
-- Keep the Settings window at a consistent height when switching between item types.
-- Make paste, sent shortcuts, and key-based Windows operations wait for
-  pressed keyboard keys and mouse buttons to be released; cancel if the
+  keep Save visible while scrolling, and keep the window height steady when
+  switching item types.
+- Before pasting text, sending a shortcut, or triggering a key-based Windows
+  operation, wait for held keys and mouse buttons to be released. Cancel if the
   original target window changes.
-- Fall back automatically when icon resources are missing without discarding
-  the saved icon path or resource index.
-- Rename System command to Windows operation, clarify operation names and
-  ordering, and add contextual hints without changing existing actions.
-- Refresh localized action choices immediately when the language changes.
+- If an icon resource is unavailable, show a fallback without discarding its
+  saved path or resource index.
+- Rename "System command" to "Windows operation", clarify operation names and
+  ordering, and add contextual hints without changing the available actions.
+- Refresh localized operation choices immediately when the language changes.
 - Use a matching monochrome Windows command-line symbol for the default
   PowerShell item.
 
 ## 1.4.10
 
-- Give the app icon a frosted finish and stronger outlines.
-- Add an About window with version, author, project link, and copyright information.
-- Add Microsoft Store packaging for Dial Menu, with Windows-managed startup.
+- Add an About window with the app version, author, project link, and copyright.
+- Add Microsoft Store packaging with Windows-managed startup.
 - Show startup restrictions in Settings and prevent overlapping saves.
-- Fix a tray icon recovery error that could close dial.
-- Update the wheel's background, text, and clickable areas when display scaling changes.
-- Fix custom icons loaded from relative paths and fall back safely for damaged images.
-- Hide the unused background window when Acrylic is unavailable.
-- Add rotating local error logs without saving clipboard text or settings.
-- Cancel pasting if focus has moved away from the original window.
+- Keep the wheel's background, text, and clickable areas aligned when display
+  scaling changes.
+- Load icons from relative paths and use a fallback for damaged images.
+- Add rotating local error logs; logs do not include clipboard text or settings.
+- Fix a tray icon recovery error that could close Dial.
+- Cancel a paste if focus moves away from the original window.
+- Hide the unused background window when transparency is unavailable.
+- Give the app icon a frosted finish and stronger outlines.
 
 ## 1.4.9
 
-- Let title bars follow Windows' light or dark mode independently of dial's theme.
-- Restore the center outline and keep it aligned with the Acrylic background during resizing.
-- Move save results and validation messages beside Save. Hover over long messages to read them in full.
-- Show translated error explanations instead of raw system exceptions.
-- Keep invalid settings open for correction rather than closing the application.
-- Allow supported installed apps, including Windows Terminal, to run as administrator.
-  Explain when elevation is unavailable; cancelling UAC leaves dial running.
+- Let the title bar follow Windows light or dark mode independently of Dial's
+  theme.
+- Show save results and validation messages beside Save. Hover over a long
+  message to read it in full.
+- Restore the center outline and keep it aligned with the Acrylic background
+  while resizing.
+- Translate error explanations and keep invalid settings open for correction.
+- Run supported installed apps, including Windows Terminal, as administrator.
+  Dial explains when elevation is unavailable; canceling UAC leaves it running.
+- Report invalid configuration files when they are loaded or reloaded.
 - Use square controls and lighter hover and keyboard-focus indicators in Settings
-  and the app picker, with square window corners on Windows 11.
-- Report invalid configuration files when loading or reloading them.
+  and the app picker. Use square window corners on Windows 11.
 
 ## 1.4.8
 
-- Update the center tint and acrylic mask together during resizing to avoid
-  the unblurred translucent phase.
-- Soften sector outlines in light and dark themes while keeping them visible; remove the
-  separate acrylic center outline, preserving Windows High Contrast behavior.
-- Merge the two sector fill layers into one accent-tinted fill, with equivalent
-  background transmission to within 8-bit alpha rounding.
-- Add Windows accent as the second color option. Follow system accent
-  changes without restarting, adapting the tint for fixed theme text colors.
-- Keep the material clip inside the painted sector edge and remove the redundant
-  WPF silhouette clip. Preserve antialiasing when applying the native input region.
-- Use neutral Add and list-selection styles without focus-driven layout changes.
-  Share control behavior between Settings and the installed-app picker, retaining
-  square corners in Settings.
-- Preview the chosen accent on Save without applying or saving the draft.
-- Align the Add/Remove/reorder toolbar with the list width, keeping arrow buttons square.
-- Align color transitions with sector enlargement using the
-  same 90 ms quintic ease-out timing. Interrupted transitions continue from
-  their current color and scale.
-- Slightly soften palette saturation without changing light Windows Blue #357EC7.
-- Keep the theme's label and glyph colors unchanged during selection in both
-  acrylic and opaque modes. Retune theme-specific palette colors for readable
-  contrast; retain light-theme Windows Blue #357EC7 as the fixed-palette exception.
-  Windows High Contrast continues to use the system highlight text color.
-- Replace independently clipped sector material visuals with one stationary
-  backdrop sampler and a combined animated clip. This targets the transient
-  gray/white fill and dark sector edges captured at window boundaries.
-- Add continuous-frame capture during rapid pointer sweeps and recovery, with
-  native-composition checks and neutral-fill comparisons against the background.
+- Add Windows accent color as an option and follow system accent changes without
+  restarting.
+- Keep the center tint and Acrylic mask in sync while resizing, and preserve
+  Windows High Contrast behavior.
+- Soften segment outlines while keeping them visible.
+- Keep labels and icons readable during selection, with or without transparency,
+  and respect Windows High Contrast colors.
+- Align the Add, Remove, and reorder controls with the item list.
+- Use consistent control behavior in Settings and the installed-app picker.
 
 ## 1.4.7
 
-- Keep sector material visuals stationary while scaling their clips. This
-  change did not eliminate the transient window-boundary rendering defect.
-- Reduce pointer-selection work to the sectors that change and shorten sector
-  selection animations for a more responsive dial.
-- Reuse fixed acrylic sector masks and hide the center mask while its disk is
-  resizing. This workaround introduced an unblurred translucent phase, addressed
-  in 1.4.8.
-- Make the full transparent center moat dismiss the dial when the center button
-  is disabled.
-- Use the correct Windows Blue color #357EC7 as the accent color in the light theme.
-- Add rapid-selection, center-mask, and hidden-center input-region regressions.
-- Resolve sector outline geometry once per layout search to avoid multi-second
-  stalls on uncached icon/label arrangements.
-- Activate the wheel after preparing its transparent entry frame and guard
-  presentation callbacks against interrupted entry/dismissal generations.
+- Make item selection respond faster to pointer movement.
+- When the center button is hidden, click the empty center to close the wheel.
+- Use Windows Blue (`#357EC7`) as the light theme's accent color.
+- Reduce delays the first time a wheel layout with new icon and label
+  combinations is opened.
+- Keep the wheel responsive when opening or closing is interrupted.
 
 ## 1.4.6
 
-- Continue center resizing from the current radius when a new selection
-  interrupts the animation. Keep the Acrylic mask in sync.
-- Set the accent color to #0078D4 in the light theme.
-- Set the accent color to the brighter blue #4CC2FF in the dark theme.
-- Add regression checks for interrupted resizing and mask alignment.
+- Continue center resizing from its current size when the selection changes,
+  keeping the Acrylic mask aligned.
+- Set the light theme accent to `#0078D4` and the dark theme accent to
+  `#4CC2FF`.
 
 ## 1.4.5
 
-- Widen the shortcut field and reduce the fixed Set/Cancel button to 48 DIPs.
-- Remove whole-canvas bitmap caching during entry and exit animations.
-- Use grayscale text rendering and animated text hinting.
-- Verify long shortcuts, localized button labels, and standalone startup and save
-  behavior in English and Simplified Chinese.
+- Give the shortcut field more room and make its Set and Cancel buttons more
+  compact.
+- Reduce rendering overhead during open and close animations and improve text
+  clarity.
 
 ## 1.4.4
 
-- Moved settings to `%LOCALAPPDATA%\dial\settings.json`.
-- Missing settings use defaults without creating a file until Save.
-- Removed executable-embedded settings and save/restart behavior.
-- Increased whole-sector selection growth to 3%, with balanced 5-DIP gaps.
-- Matched icon separators to runtime geometry.
-- Corrected mirrored left/right icon and label ordering.
+- Move settings to `%LOCALAPPDATA%\dial\settings.json` instead of storing them
+  in the executable. Missing settings use defaults; the file is created when
+  you save. Saving no longer rewrites the executable or requires a restart.
+- Make selected sectors easier to distinguish and keep the gaps between them
+  even.
+- Correct the left/right ordering of icons and labels.
 
 ## 1.4.3
 
-- Centered selection scaling on each sector rather than the wheel.
-- Added selected-outline growth and matching native hit regions.
-- Updated icon separators to shared runtime proportions.
+- Scale each selected item from its own center and keep its outline and clickable
+  area aligned.
+- Match icon spacing to the wheel layout.
 
 ## 1.4.2
 
-- Introduced a frosted translucent icon with an empty center.
-- Improved diagonal label fitting, shutdown behavior, shortcut validation,
-  and boundary coverage.
-- Fixed native material/content window ordering and dispatcher-queue lifetime.
+- Introduce a frosted, translucent app icon with an empty center.
+- Improve label fitting on diagonal sectors, shortcut validation, and app
+  shutdown reliability.
