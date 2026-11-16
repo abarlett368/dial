@@ -49,7 +49,7 @@
 - Restore the center outline and keep it aligned with the Acrylic background
   while resizing.
 - Translate error explanations and keep invalid settings open for correction.
-- Run supported installed apps, including Windows Terminal, as administrator.
+- Run supported installed apps as administrator.
   Dial explains when elevation is unavailable; canceling UAC leaves it running.
 - Report invalid configuration files when they are loaded or reloaded.
 - Use square controls and lighter hover and keyboard-focus indicators in Settings
