@@ -191,7 +191,7 @@ Error logs are stored locally in `%LOCALAPPDATA%\dial\logs` and are not
 automatically uploaded. They omit clipboard text and full settings contents.
 Diagnostic trace output may include paths or application identifiers.
 
-For more information, see the [Privacy Policy for Dial Menu](https://cdn.storeedgefd.dsx.mp.microsoft.com/wus2/privacy-policy-storage/97319480/00013648632900678756/1152921505702391275/privacy_policy_adb16b86-d64d-41c8-a54c-3477e38fed30.txt).
+For more information, see the [Privacy Policy for Dial Menu](https://cdn.storeedgefd.dsx.mp.microsoft.com/wus2/privacy-policy-storage/97319480/00013648632900678756/1152921505702409671/privacy_policy_f3206ed5-27e8-4d36-88b2-f479c7890f1f.txt).
 
 ## Troubleshooting
 
